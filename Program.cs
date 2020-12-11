@@ -10,16 +10,15 @@ namespace SubtitlesApp {
 
             //Console.Write("Season Folder: ");
             // string pathToSeasonFolder = Console.ReadLine();
-            string pathSeasonFolder = @"C:\Mr Robot - S02";
+            string seasonFolder = @"C:\Mr Robot - S02";
 
-            string[] allEpisodeFolders = Directory.GetDirectories(pathSeasonFolder);
+            string[] episodeFolderList = Directory.GetDirectories(seasonFolder);
 
-            foreach(string episodeFolder in allEpisodeFolders) {
+            foreach(string episodeFolder in episodeFolderList) {
                 if(Subtitles.CheckForSubFolder(episodeFolder)) {
                     Subtitles.MoveFiles(episodeFolder);
-
-                } else { 
-                }
+                    Subtitles.ImportToMkv(episodeFolder);
+                } else {}
                 DeleteNFO(episodeFolder);
                 Console.WriteLine();
             }
@@ -71,6 +70,14 @@ namespace SubtitlesApp {
             }
             catch(Exception e) { Console.WriteLine(e.ToString()); }
 
+        }
+
+        public static void ImportToMkv(string episodeFolder) {
+            try {
+
+            } catch(Exception e) {
+                App.WriteLine(e.ToString(), ConsoleColor.DarkRed);
+            }
         }
 
         public static bool IsDirectoryEmpty(string path) {
