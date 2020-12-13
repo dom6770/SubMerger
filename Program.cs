@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using 
 
 namespace SubtitlesApp {
     class App {
@@ -9,40 +10,32 @@ namespace SubtitlesApp {
             Console.Title = "SubtitleApp";
 
             //Console.Write("Season Folder: ");
-            // string pathToSeasonFolder = Console.ReadLine();
+            //string seasonFolder = Console.ReadLine();
             string seasonFolder = @"C:\Mr Robot - S02";
 
             string[] episodeFolderList = Directory.GetDirectories(seasonFolder);
 
             foreach(string episodeFolder in episodeFolderList) {
-                if(Subtitles.CheckForSubFolder(episodeFolder)) {
-                    Subtitles.MoveFiles(episodeFolder);
-                    Subtitles.ImportToMkv(episodeFolder);
+                if(Folder.CheckForSubFolder(episodeFolder)) {
+                    Folder.MoveFiles(episodeFolder);
+                    MKV.Import(episodeFolder);
                 } else {}
-                DeleteNFO(episodeFolder);
+                Folder.DeleteNFO(episodeFolder);
                 Console.WriteLine();
             }
         }
-
-        public static void WriteLine(string text, ConsoleColor ccolor) {
-            //string colorFull = "ConsoleColor." + color;
-            //ConsoleColor ccolor = colorFull;
-
-            Console.BackgroundColor = ccolor;
-            Console.WriteLine(text);
+        public static void Write(string inputText, ConsoleColor inputColor) {
+            Console.BackgroundColor = inputColor;
+            Console.Write(" " + inputText + " ");
             Console.ResetColor();
         }
-
-        public static void DeleteNFO(string episodeFolder) {
-            try {
-                foreach(string nfo in Directory.EnumerateFiles(episodeFolder, "*.nfo")) {
-                    File.Delete(nfo);
-                    WriteLine(episodeFolder + "  | .NFO deleted", ConsoleColor.DarkGreen);
-                }
-            } catch(Exception e) { Console.WriteLine(e.ToString()); };
+        public static void WriteLine(string inputText, ConsoleColor inputColor) {
+            Console.BackgroundColor = inputColor;
+            Console.WriteLine(inputText);
+            Console.ResetColor();
         }
     }
-    class Subtitles {
+    class Folder {
         public static bool CheckForSubFolder(string episodeFolder) {
             if(Directory.Exists(episodeFolder + @"\Subs")) {
                 App.WriteLine(episodeFolder + "  | Subtitle folder found!", ConsoleColor.DarkGreen);
@@ -52,7 +45,6 @@ namespace SubtitlesApp {
                 return false;
             }
         }
-
         public static void MoveFiles(string episodeFolder) {
             string subFolder = episodeFolder + @"\Subs";
 
@@ -71,17 +63,50 @@ namespace SubtitlesApp {
             catch(Exception e) { Console.WriteLine(e.ToString()); }
 
         }
-
-        public static void ImportToMkv(string episodeFolder) {
+        public static bool IsDirectoryEmpty(string path) {
+            return !Directory.EnumerateFileSystemEntries(path).Any();
+        }
+        public static void DeleteNFO(string episodeFolder) {
             try {
+                foreach(string nfo in Directory.EnumerateFiles(episodeFolder, "*.nfo")) {
+                    File.Delete(nfo);
+                    App.WriteLine(episodeFolder + "  | .NFO deleted", ConsoleColor.DarkGreen);
+                }
+            }
+            catch(Exception e) { Console.WriteLine(e.ToString()); };
+        }
+    }
+    class MKV {
+        public static void Import(string episodeFolder) {
+            try {
+                string[] fileList = Directory.GetFiles(episodeFolder);
 
+
+                
+                //foreach(string file in fileList) {
+                //    App.WriteLine(file, ConsoleColor.Cyan);
+                //
+                //    //string endsWithidxEnglishFull =     "eng.idx";
+                //    //string endsWithsubEnglishFull =     "eng.sub";
+                //    //string endsWithidxEnglishForced =   "eng-forced.idx";
+                //    //string endsWithsubEnglishForced =   "eng-forced.sub";
+                //    //string endsWithidxGermanFull =      ".idx";
+                //    //string endsWithsubGermanFull =      ".sub";
+                //    //string endsWithidxGermanForced =    "-forced.dix";
+                //    string endsWithsubGermanForced =    "-forced.sub";
+                //
+                //    switch(file) {
+                //        case germanForced gerForced when file.EndsWith(endsWithsubGermanForced):
+                //            App.Write("hooray", ConsoleColor.Magenta);
+                //    }
+                //
+                //    if(file.EndsWith(endsWithsubGermanForced)) {
+                //        App.WriteLine("IT WORKED", ConsoleColor.Magenta);
+                //    }
+                //}
             } catch(Exception e) {
                 App.WriteLine(e.ToString(), ConsoleColor.DarkRed);
             }
-        }
-
-        public static bool IsDirectoryEmpty(string path) {
-            return !Directory.EnumerateFileSystemEntries(path).Any();
         }
     }
 }
