@@ -104,6 +104,17 @@ namespace SubtitlesApp {
             }
             catch(Exception e) { Console.WriteLine(e.ToString()); };
         }
+        public static void RenameFile(string from, string to) {
+            if(File.Exists(from) && File.Exists(to)) {
+                File.Delete(to);
+                File.Move(from, to);
+            }
+        }
+        public static void DeleteSubtitleFiles(List<string> subFiles) {
+            foreach(string subFile in subFiles) {
+                File.Delete(subFile);
+            }
+        }
     }
     class MKV {
         public static void Import(string episodeFolder) {
@@ -151,8 +162,8 @@ namespace SubtitlesApp {
                 }
 
                 RunCommand(mkvmerge);
-                RenameFile(mkvOutputPath, mkvInputPath);
-                DeleteSubtitleFiles(subFiles);
+                Folder.RenameFile(mkvOutputPath, mkvInputPath);
+                Folder.DeleteSubtitleFiles(subFiles);
 
                 App.WriteLine("  DONE  ", ConsoleColor.DarkGreen);
             } catch(Exception e) { App.WriteLine(e.ToString(), ConsoleColor.DarkRed); }
@@ -163,16 +174,6 @@ namespace SubtitlesApp {
             Process cmd = Process.Start(cmdsi);
             cmd.WaitForExit();
         }
-        public static void RenameFile(string from, string to) {
-            if(File.Exists(from) && File.Exists(to)) {
-                File.Delete(to);
-                File.Move(from, to);
-            }
-        }
-        public static void DeleteSubtitleFiles(List<string> subFiles) {
-            foreach(string subFile in subFiles) {
-                File.Delete(subFile);
-            }
-        }
+
     }
 }
