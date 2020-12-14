@@ -7,19 +7,19 @@ using System.Linq;
 namespace SubtitlesApp {
     class App {
         private static int Main(string[] args) {
-            string seasonFolder = args[0];
-            string[] episodeFolderList = Directory.GetDirectories(seasonFolder);
+            string downloadFolder = args[0];
+            string[] SubfolderList = Directory.GetDirectories(downloadFolder);
 
             Console.WriteLine("Starting...");
-            Console.WriteLine(episodeFolderList.Length + " Episodes found");
+            Console.WriteLine(SubfolderList.Length + " Episodes found");
             Console.WriteLine("   ");
 
             int count = 1;
 
             try {
-                if(episodeFolderList.Count() > 1) { // > 1 for full Seasons (multiple episodes inside the season folder)
-                    foreach(string episodeFolder in episodeFolderList) {
-                        Console.WriteLine(count++.ToString() + "/" + episodeFolderList.Length.ToString());
+                if(SubfolderList.Count() > 1) { // > 1 for full Seasons (multiple episodes inside the season folder)
+                    foreach(string episodeFolder in SubfolderList) {
+                        Console.WriteLine(count++.ToString() + "/" + SubfolderList.Length.ToString());
 
                         Folder.DeleteNFO(episodeFolder);
                         if(Folder.CheckForSubFolder(episodeFolder)) { Folder.MoveFiles(episodeFolder); }
@@ -27,12 +27,12 @@ namespace SubtitlesApp {
                     }
                     Console.WriteLine("Script finished.");
                     return 0;
-                } else if(episodeFolderList.Count() < 1) { // < 1 for single episodes or movies
-                    Console.WriteLine("Movie/Episode ");
+                } else if(SubfolderList.Count() <= 1) { // < 1 for single episodes or movies
+                    Console.WriteLine("Movie/Episode found - starting mkvmerge");
 
-                    Folder.DeleteNFO(seasonFolder);
-                    if(Folder.CheckForSubFolder(seasonFolder)) { Folder.MoveFiles(seasonFolder); }
-                    if(Directory.GetFiles(seasonFolder).Length > 1) { MKV.Import(seasonFolder); }
+                    Folder.DeleteNFO(downloadFolder);
+                    if(Folder.CheckForSubFolder(downloadFolder)) { Folder.MoveFiles(downloadFolder); }
+                    if(Directory.GetFiles(downloadFolder).Length > 1) { MKV.Import(downloadFolder); }
 
                     Console.WriteLine("Script finished.");
                     return 0; // 0 -> Success
