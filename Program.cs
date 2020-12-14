@@ -6,61 +6,44 @@ using System.Linq;
 
 namespace SubtitlesApp {
     class App {
-        private static void Main() {
-            Console.Title = "SubtitleApp";
-
-            Console.Write("Season Folder: ");
-            string seasonFolder = Console.ReadLine();
-            //string seasonFolder = @"E:\DOWNLOAD\Preacher.S03.German.DL.1080p.BluRay.x264-iNTENTiON";
-
+        private static int Main(string[] args) {
+            string seasonFolder = args[0];
             string[] episodeFolderList = Directory.GetDirectories(seasonFolder);
 
-            Write("---", ConsoleColor.DarkRed); Write("STARTING", ConsoleColor.Black); WriteLine("---", ConsoleColor.DarkRed);
-            WriteLine(" ", ConsoleColor.Black);
-            WriteLine("We found " + episodeFolderList.Length + " episodes in the season folder", ConsoleColor.DarkBlue);
-            WriteLine(" ", ConsoleColor.Black); WriteLine(" ", ConsoleColor.Black);
+            Console.WriteLine("Starting...");
+            Console.WriteLine(episodeFolderList.Length + " Episodes found");
+            Console.WriteLine("   ");
 
             int count = 1;
 
-            foreach(string episodeFolder in episodeFolderList) {
-                Write(" #" + count++.ToString(), ConsoleColor.DarkGreen);
-                WriteLine(" " + episodeFolder, ConsoleColor.DarkGreen);
-                WriteLine(" ", ConsoleColor.Black);
-                WriteLine("      File count: " + Directory.GetFiles(episodeFolder).Length + " ", ConsoleColor.DarkGray);
-                WriteLine(" ", ConsoleColor.Black);
+            if(episodeFolderList.Count() > 1) {
+                try {
+                    foreach(string episodeFolder in episodeFolderList) {
+                        Console.WriteLine(count++.ToString() + "/" + episodeFolderList.Length.ToString());
 
-                string[] allFiles = Directory.GetFiles(episodeFolder);
+                        string[] allFiles = Directory.GetFiles(episodeFolder);
 
-                foreach(string file in allFiles) {
-                    WriteLine("      " + file, ConsoleColor.Black);
-                }
+                        Folder.DeleteNFO(episodeFolder);
+                        if(Folder.CheckForSubFolder(episodeFolder)) { Folder.MoveFiles(episodeFolder); }
+                        if(Directory.GetFiles(episodeFolder).Length > 1) { MKV.Import(episodeFolder); }
+                    }
+                    Console.WriteLine("Script finished.");
+                    return 0;
+                } catch(Exception e) { Console.WriteLine(e.ToString()); return 1; }
+            } else if (episodeFolderList.Count() == 1) {
+                try {
+                    Console.WriteLine(count++.ToString() + "/" + episodeFolderList.Length.ToString());
 
-                WriteLine(" ", ConsoleColor.Black);
+                    string[] allFiles = Directory.GetFiles(seasonFolder);
 
-                Folder.DeleteNFO(episodeFolder);
-                if(Folder.CheckForSubFolder(episodeFolder)) { 
-                    WriteLine("      We found a subtitle folder, proceeding moving files and deleting folder...", ConsoleColor.Black); 
-                    Folder.MoveFiles(episodeFolder); 
-                }
-                if(Directory.GetFiles(episodeFolder).Length > 1) { 
-                    WriteLine("      Folder containts more than two files, proceeding importing subtitles into mkv...", ConsoleColor.Black); 
-                    MKV.Import(episodeFolder); 
-                } else {
-                    WriteLine("      We couldn't find any subtitles, proceeding with next episode...", ConsoleColor.Black);
-                }
-                Console.WriteLine();
+                    Folder.DeleteNFO(seasonFolder);
+                    if(Folder.CheckForSubFolder(seasonFolder)) { Folder.MoveFiles(seasonFolder); }
+                    if(Directory.GetFiles(seasonFolder).Length > 1) { MKV.Import(seasonFolder); }
+                    Console.WriteLine("Script finished.");
+                    return 0; // 0 -> Success
+                } catch(Exception e) { Console.WriteLine(e.ToString()); return 1; }
             }
-            //Console.Read();
-        }
-        public static void Write(string inputText, ConsoleColor inputColor) {
-            Console.BackgroundColor = inputColor;
-            Console.Write(" " + inputText + " ");
-            Console.ResetColor();
-        }
-        public static void WriteLine(string inputText, ConsoleColor inputColor) {
-            Console.BackgroundColor = inputColor;
-            Console.WriteLine(inputText);
-            Console.ResetColor();
+            return 1;
         }
     }
     class Folder {
@@ -73,17 +56,13 @@ namespace SubtitlesApp {
             try {
                 IEnumerable<FileInfo> files = Directory.GetFiles(subFolder).Select(f => new FileInfo(f));
 
-                App.WriteLine("   ", ConsoleColor.Black);
                 foreach(var file in files) {
                     File.Move(file.FullName, Path.Combine(episodeFolder, file.Name));
-                    App.WriteLine("      File " + file.ToString() + " moved", ConsoleColor.Black);
                 }
                 
                 if(IsDirectoryEmpty(subFolder)) { 
                     Directory.Delete(subFolder);
-                    App.WriteLine("      Folder " + subFolder.ToString() + " deleted", ConsoleColor.Black);
                 };
-                App.WriteLine("   ", ConsoleColor.Black);
             }
             catch(Exception e) { Console.WriteLine(e.ToString()); }
 
@@ -93,12 +72,8 @@ namespace SubtitlesApp {
         }
         public static void DeleteNFO(string episodeFolder) {
             try {
-                foreach(string nfo in Directory.EnumerateFiles(episodeFolder, "*.nfo")) {
-                    File.Delete(nfo);
-                    App.WriteLine(episodeFolder + "  | .NFO deleted", ConsoleColor.DarkGreen);
-                }
-            }
-            catch(Exception e) { Console.WriteLine(e.ToString()); };
+                foreach(string nfo in Directory.EnumerateFiles(episodeFolder, "*.nfo")) { File.Delete(nfo); }
+            } catch(Exception e) { Console.WriteLine(e.ToString()); };
         }
         public static void RenameFile(string from, string to) {
             if(File.Exists(from) && File.Exists(to)) {
@@ -129,7 +104,7 @@ namespace SubtitlesApp {
                 string subtitleGerFull = mkvInputName;
                 string subtitleGerForced = mkvInputName + "-forced";
 
-                string mkvmerge = "mkvmerge -o '" + mkvOutputPath + "' --no-subtitles '" + mkvInputPath + "' ";
+                string mkvmerge = "& 'C:\\Program Files\\MKVToolNix\\mkvmerge.exe' -o '" + mkvOutputPath + "' -q --no-subtitles '" + mkvInputPath + "' ";
                 if(Folder.SubfilesExist(episodeFolder, subtitleEngFull)) {
                     mkvmerge += "--language 0:eng " +
                                 "--track-name 0:Full '" 
@@ -156,17 +131,12 @@ namespace SubtitlesApp {
                 }
 
                 if(File.Exists(mkvOutputPath)) { File.Delete(mkvOutputPath); }
-                Console.WriteLine();
-                Console.ForegroundColor = ConsoleColor.Gray;
+
                 RunCommand(mkvmerge);
-                Console.ResetColor();
                 Folder.RenameFile(mkvOutputPath, mkvInputPath);
                 Folder.DeleteSubtitleFiles(subtitlesIdx);
                 Folder.DeleteSubtitleFiles(subtitlesSub);
-
-                App.WriteLine("  DONE  ", ConsoleColor.DarkGreen);
-                Console.WriteLine();
-            } catch(Exception e) { App.WriteLine(e.ToString(), ConsoleColor.DarkRed); }
+            } catch(Exception e) { Console.WriteLine(e.ToString()); }
         }
         public static void BuildCommand(string episodeFolder) {
 
@@ -177,6 +147,5 @@ namespace SubtitlesApp {
             Process cmd = Process.Start(cmdsi);
             cmd.WaitForExit();
         }
-
     }
 }
