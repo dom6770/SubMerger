@@ -16,12 +16,10 @@ namespace SubtitlesApp {
 
             int count = 1;
 
-            if(episodeFolderList.Count() > 1) {
-                try {
+            try {
+                if(episodeFolderList.Count() > 1) { // > 1 for full Seasons (multiple episodes inside the season folder)
                     foreach(string episodeFolder in episodeFolderList) {
                         Console.WriteLine(count++.ToString() + "/" + episodeFolderList.Length.ToString());
-
-                        string[] allFiles = Directory.GetFiles(episodeFolder);
 
                         Folder.DeleteNFO(episodeFolder);
                         if(Folder.CheckForSubFolder(episodeFolder)) { Folder.MoveFiles(episodeFolder); }
@@ -29,21 +27,20 @@ namespace SubtitlesApp {
                     }
                     Console.WriteLine("Script finished.");
                     return 0;
-                } catch(Exception e) { Console.WriteLine(e.ToString()); return 1; }
-            } else if (episodeFolderList.Count() == 1) {
-                try {
-                    Console.WriteLine(count++.ToString() + "/" + episodeFolderList.Length.ToString());
-
-                    string[] allFiles = Directory.GetFiles(seasonFolder);
+                } else if(episodeFolderList.Count() < 1) { // < 1 for single episodes or movies
+                    Console.WriteLine("Movie/Episode ");
 
                     Folder.DeleteNFO(seasonFolder);
                     if(Folder.CheckForSubFolder(seasonFolder)) { Folder.MoveFiles(seasonFolder); }
                     if(Directory.GetFiles(seasonFolder).Length > 1) { MKV.Import(seasonFolder); }
+
                     Console.WriteLine("Script finished.");
                     return 0; // 0 -> Success
-                } catch(Exception e) { Console.WriteLine(e.ToString()); return 1; }
-            }
-            return 1;
+                } else {
+                    Console.WriteLine("Script coulnd't find any subtitles to import.");
+                    return 0;
+                }
+            } catch(Exception e) { Console.WriteLine(e.ToString()); return 1; }
         }
     }
     class Folder {
