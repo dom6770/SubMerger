@@ -157,8 +157,7 @@ namespace SubtitlesApp {
 
                 RunCommand(mkvmerge);
                 RenameFile(mkvOutputPath, mkvInputPath);
-
-                foreach(string subFile in subFiles) { File.Delete(subFile); }
+                DeleteSubtitleFiles(subFiles);
 
                 App.WriteLine("  DONE  ", ConsoleColor.DarkGreen);
             } catch(Exception e) { App.WriteLine(e.ToString(), ConsoleColor.DarkRed); }
@@ -173,6 +172,11 @@ namespace SubtitlesApp {
             if(File.Exists(from) && File.Exists(to)) {
                 File.Delete(to);
                 File.Move(from, to);
+            }
+        }
+        public static void DeleteSubtitleFiles(List<string> subFiles) {
+            foreach(string subFile in subFiles) {
+                File.Delete(subFile);
             }
         }
     }
