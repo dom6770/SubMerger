@@ -13,7 +13,7 @@ namespace SubtitlesApp {
 
             //Console.Write("Season Folder: ");
             //string seasonFolder = Console.ReadLine();
-            string seasonFolder = @"E:\DOWNLOAD\Mr.Robot.S02.Complete.German.DL.1080p.BluRay.x264-RSG - Copy";
+            string seasonFolder = @"C:\Mr Robot - S02";
 
             string[] episodeFolderList = Directory.GetDirectories(seasonFolder);
 
@@ -55,6 +55,7 @@ namespace SubtitlesApp {
                 }
                 Console.WriteLine();
             }
+            Console.Read();
         }
         public static void Write(string inputText, ConsoleColor inputColor) {
             Console.BackgroundColor = inputColor;
@@ -112,40 +113,52 @@ namespace SubtitlesApp {
     class MKV {
         public static void Import(string episodeFolder) {
             try {
+                string mkvInputPath = "";
                 string[] allFiles = Directory.GetFiles(episodeFolder);
                 List<string> subFiles = new List<string>();
-                List<string> subFilesDel = new List<string>();
-
-                string mkvInputPath = "";
 
                 foreach(string file in allFiles) {
                     if(file.EndsWith("1080p.mkv")) {
                         mkvInputPath = file;
                     } else {
-                        subFiles.Add("'" + file + "' ");
-                        subFilesDel.Add(file);
+                        subFiles.Add(file);
                     }
                 }; subFiles.Sort();
 
                 string mkvOutputPath = mkvInputPath.Remove(mkvInputPath.Length - 4, 4) ; mkvOutputPath += "_new.mkv";
                 if(File.Exists(mkvOutputPath)) { File.Delete(mkvOutputPath); }
 
-                string command =
-                    "mkvmerge -o '" + mkvOutputPath + "' '" + mkvInputPath + "' " +
-                    "--track-name 0:Full " + subFiles[0] + subFiles[1] +
-                    "--track-name 0:Full " + subFiles[2] + subFiles[3];
-                if(subFiles.Count > 4 && subFiles.Count < 6) {
-                    command += "--track-name 0:Forced " + subFiles[4] + subFiles[5];
+                string mkvmerge = "mkvmerge -o '" + mkvOutputPath + "' '" + mkvInputPath + "' ";
+
+                if(Directory.GetFiles(episodeFolder, "*p.idx").Any() && Directory.GetFiles(episodeFolder, "*p.sub").Any()) {
+                    mkvmerge += "--language 0:ger " +
+                                "--track-name 0:Full '" 
+                                + Directory.GetFiles(episodeFolder, "*p.idx")[0] + "' '" 
+                                + Directory.GetFiles(episodeFolder, "*p.sub")[0] + "' ";
                 }
-                if(subFiles.Count > 6) {
-                    command += "--track-name 0:Forced " + subFiles[6] + subFiles[7];
+                if(Directory.GetFiles(episodeFolder, "*p-eng.idx").Any() && Directory.GetFiles(episodeFolder, "*p-eng.sub").Any()) {
+                    mkvmerge += "--language 0:eng " +
+                                "--track-name 0:Full '" 
+                                + Directory.GetFiles(episodeFolder, "*p-eng.idx")[0] + "' '" 
+                                + Directory.GetFiles(episodeFolder, "*p-eng.sub")[0] + "' ";
+                }
+                if(Directory.GetFiles(episodeFolder, "*p-forced.idx").Any() && Directory.GetFiles(episodeFolder, "*p-forced.sub").Any()) {
+                    mkvmerge += "--language 0:ger " +
+                                "--track-name 0:Forced '" 
+                                + Directory.GetFiles(episodeFolder, "*p-forced.idx")[0] + "' '" 
+                                + Directory.GetFiles(episodeFolder, "*p-forced.sub")[0] + "' ";
+                }
+                if(Directory.GetFiles(episodeFolder, "*p-eng-forced.idx").Any() && Directory.GetFiles(episodeFolder, "*p-eng-forced.sub").Any()) {
+                    mkvmerge += "--language 0:eng " +
+                                "--track-name 0:Forced '"
+                                + Directory.GetFiles(episodeFolder, "*p-eng-forced.idx")[0] + "' '" 
+                                + Directory.GetFiles(episodeFolder, "*p-eng-forced.sub")[0] + "' ";
                 }
 
-                RunCommand(command);
+                RunCommand(mkvmerge);
                 RenameFile(mkvOutputPath, mkvInputPath);
-                foreach(string subFile in subFilesDel) {
-                    File.Delete(subFile);
-                }
+
+                foreach(string subFile in subFiles) { File.Delete(subFile); }
 
                 App.WriteLine("  DONE  ", ConsoleColor.DarkGreen);
             } catch(Exception e) { App.WriteLine(e.ToString(), ConsoleColor.DarkRed); }
