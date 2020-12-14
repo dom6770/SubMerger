@@ -65,11 +65,7 @@ namespace SubtitlesApp {
     }
     class Folder {
         public static bool CheckForSubFolder(string episodeFolder) {
-            if(Directory.Exists(episodeFolder + @"\Subs")) {
-                return true;
-            } else {
-                return false;
-            }
+            return Directory.Exists(episodeFolder + @"\Subs");
         }
         public static void MoveFiles(string episodeFolder) {
             string subFolder = episodeFolder + @"\Subs";
@@ -129,7 +125,7 @@ namespace SubtitlesApp {
                     } else {
                         subFiles.Add(file);
                     }
-                }; subFiles.Sort();
+                }
 
                 string mkvOutputPath = mkvInputPath.Remove(mkvInputPath.Length - 4, 4) ; mkvOutputPath += "_new.mkv";
                 if(File.Exists(mkvOutputPath)) { File.Delete(mkvOutputPath); }
@@ -167,6 +163,9 @@ namespace SubtitlesApp {
 
                 App.WriteLine("  DONE  ", ConsoleColor.DarkGreen);
             } catch(Exception e) { App.WriteLine(e.ToString(), ConsoleColor.DarkRed); }
+        }
+        public static void BuildCommand(string episodeFolder) {
+
         }
         public static void RunCommand(string command) {
             ProcessStartInfo cmdsi = new ProcessStartInfo("powershell.exe");
