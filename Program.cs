@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using Xabe.FFmpeg;
 
 namespace SubtitlesApp {
     class App {
@@ -17,13 +15,10 @@ namespace SubtitlesApp {
 
             string[] episodeFolderList = Directory.GetDirectories(seasonFolder);
 
-            Write("---", ConsoleColor.DarkRed);
-            Write("STARTING", ConsoleColor.Black);
-            WriteLine("---", ConsoleColor.DarkRed);
+            Write("---", ConsoleColor.DarkRed); Write("STARTING", ConsoleColor.Black); WriteLine("---", ConsoleColor.DarkRed);
             WriteLine(" ", ConsoleColor.Black);
             WriteLine("We found " + episodeFolderList.Length + " episodes in the season folder", ConsoleColor.DarkBlue);
-            WriteLine(" ", ConsoleColor.Black);
-            WriteLine(" ", ConsoleColor.Black);
+            WriteLine(" ", ConsoleColor.Black); WriteLine(" ", ConsoleColor.Black);
 
             int count = 1;
 
