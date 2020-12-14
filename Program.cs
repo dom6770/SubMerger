@@ -9,9 +9,9 @@ namespace SubtitlesApp {
         private static void Main() {
             Console.Title = "SubtitleApp";
 
-            //Console.Write("Season Folder: ");
-            //string seasonFolder = Console.ReadLine();
-            string seasonFolder = @"C:\Mr Robot - S02";
+            Console.Write("Season Folder: ");
+            string seasonFolder = Console.ReadLine();
+            //string seasonFolder = @"E:\DOWNLOAD\Preacher.S03.German.DL.1080p.BluRay.x264-iNTENTiON";
 
             string[] episodeFolderList = Directory.GetDirectories(seasonFolder);
 
@@ -50,7 +50,7 @@ namespace SubtitlesApp {
                 }
                 Console.WriteLine();
             }
-            Console.Read();
+            //Console.Read();
         }
         public static void Write(string inputText, ConsoleColor inputColor) {
             Console.BackgroundColor = inputColor;
@@ -106,7 +106,7 @@ namespace SubtitlesApp {
                 File.Move(from, to);
             }
         }
-        public static void DeleteSubtitleFiles(List<string> subFiles) {
+        public static void DeleteSubtitleFiles(string[] subFiles) {
             foreach(string subFile in subFiles) {
                 File.Delete(subFile);
             }
@@ -118,55 +118,54 @@ namespace SubtitlesApp {
     class MKV {
         public static void Import(string episodeFolder) {
             try {
-                string mkvInputPath = "";
-                string[] allFiles = Directory.GetFiles(episodeFolder);
-                List<string> subFiles = new List<string>();
+                string      mkvInputPath    = Directory.GetFiles(episodeFolder, "*.mkv").First();
+                string      mkvInputName    = Path.GetFileNameWithoutExtension(mkvInputPath);
+                string      mkvOutputPath   = mkvInputPath.Remove(mkvInputPath.Length - 4, 4); mkvOutputPath += "_new.mkv";
+                string[]    subtitlesIdx = Directory.GetFiles(episodeFolder, "*.idx");
+                string[]    subtitlesSub = Directory.GetFiles(episodeFolder, "*.sub");
 
-                foreach(string file in allFiles) {
-                    if(file.EndsWith("1080p.mkv")) { mkvInputPath = file; }
-                    else { subFiles.Add(file); }
-                }
+                string subtitleEngFull = mkvInputName + "-eng";
+                string subtitleEngForced = mkvInputName + "-eng-forced";
+                string subtitleGerFull = mkvInputName;
+                string subtitleGerForced = mkvInputName + "-forced";
 
-                string wildcardEngFull = "*p-eng";
-                string wildcardGerFull = "*p";
-                string wildcardEngForced = "*p-eng-forced";
-                string wildcardGerForced = "*p-forced";
-
-                string mkvOutputPath = mkvInputPath.Remove(mkvInputPath.Length - 4, 4) ; mkvOutputPath += "_new.mkv";
-                if(File.Exists(mkvOutputPath)) { File.Delete(mkvOutputPath); }
-
-                string mkvmerge = "mkvmerge -o '" + mkvOutputPath + "' '" + mkvInputPath + "' ";
-
-                if(Folder.SubfilesExist(episodeFolder, wildcardGerFull)) {
-                    mkvmerge += "--language 0:ger " +
-                                "--track-name 0:Full '" 
-                                + Directory.GetFiles(episodeFolder, wildcardGerFull + ".idx")[0] + "' '" 
-                                + Directory.GetFiles(episodeFolder, wildcardGerFull + ".sub")[0] + "' ";
-                }
-                if(Folder.SubfilesExist(episodeFolder, wildcardEngFull)) {
+                string mkvmerge = "mkvmerge -o '" + mkvOutputPath + "' --no-subtitles '" + mkvInputPath + "' ";
+                if(Folder.SubfilesExist(episodeFolder, subtitleEngFull)) {
                     mkvmerge += "--language 0:eng " +
                                 "--track-name 0:Full '" 
-                                + Directory.GetFiles(episodeFolder, wildcardEngFull + ".idx")[0] + "' '" 
-                                + Directory.GetFiles(episodeFolder, wildcardEngFull + ".sub")[0] + "' ";
+                                + Directory.GetFiles(episodeFolder, subtitleEngFull + ".idx")[0] + "' '" 
+                                + Directory.GetFiles(episodeFolder, subtitleEngFull + ".sub")[0] + "' ";
                 }
-                if(Folder.SubfilesExist(episodeFolder, wildcardGerForced)) {
-                    mkvmerge += "--language 0:ger " +
-                                "--track-name 0:Forced '" 
-                                + Directory.GetFiles(episodeFolder, wildcardGerForced + ".idx")[0] + "' '" 
-                                + Directory.GetFiles(episodeFolder, wildcardGerForced + ".sub")[0] + "' ";
-                }
-                if(Folder.SubfilesExist(episodeFolder, wildcardEngForced)) {
+                if(Folder.SubfilesExist(episodeFolder, subtitleEngForced)) {
                     mkvmerge += "--language 0:eng " +
                                 "--track-name 0:Forced '"
-                                + Directory.GetFiles(episodeFolder, wildcardEngForced + ".idx")[0] + "' '" 
-                                + Directory.GetFiles(episodeFolder, wildcardEngForced + ".sub")[0] + "' ";
+                                + Directory.GetFiles(episodeFolder, subtitleEngForced + ".idx")[0] + "' '"
+                                + Directory.GetFiles(episodeFolder, subtitleEngForced + ".sub")[0] + "' ";
+                }
+                if(Folder.SubfilesExist(episodeFolder, subtitleGerFull)) {
+                    mkvmerge += "--language 0:ger " +
+                                "--track-name 0:Full '"
+                                + Directory.GetFiles(episodeFolder, subtitleGerFull + ".idx")[0] + "' '" 
+                                + Directory.GetFiles(episodeFolder, subtitleGerFull + ".sub")[0] + "' ";
+                }
+                if(Folder.SubfilesExist(episodeFolder, subtitleGerForced)) {
+                    mkvmerge += "--language 0:ger " +
+                                "--track-name 0:Forced '"
+                                + Directory.GetFiles(episodeFolder, subtitleGerForced + ".idx")[0] + "' '"
+                                + Directory.GetFiles(episodeFolder, subtitleGerForced + ".sub")[0] + "' ";
                 }
 
+                if(File.Exists(mkvOutputPath)) { File.Delete(mkvOutputPath); }
+                Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.Gray;
                 RunCommand(mkvmerge);
+                Console.ResetColor();
                 Folder.RenameFile(mkvOutputPath, mkvInputPath);
-                Folder.DeleteSubtitleFiles(subFiles);
+                Folder.DeleteSubtitleFiles(subtitlesIdx);
+                Folder.DeleteSubtitleFiles(subtitlesSub);
 
                 App.WriteLine("  DONE  ", ConsoleColor.DarkGreen);
+                Console.WriteLine();
             } catch(Exception e) { App.WriteLine(e.ToString(), ConsoleColor.DarkRed); }
         }
         public static void BuildCommand(string episodeFolder) {
