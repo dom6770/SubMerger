@@ -7,45 +7,49 @@ using System.Linq;
 namespace SubtitlesApp {
     class App {
         private static int Main(string[] args) {
+            System.Threading.Thread.Sleep(2000); //wait two seconds for SABnzbd PP
+
             string downloadFolder = args[0];
-            string[] SubfolderList = Directory.GetDirectories(downloadFolder);
+            string[] subfolderList = Directory.GetDirectories(downloadFolder);
 
             Console.WriteLine("Starting...");
-            Console.WriteLine(SubfolderList.Length + " Episodes found");
+            Console.WriteLine("downloadFolder: " + downloadFolder);
+            foreach(string subfolder in subfolderList) { Console.WriteLine("subfolder: " + subfolder); }
+            Console.WriteLine(subfolderList.Length + " Episodes found");
             Console.WriteLine("   ");
 
             int count = 1;
 
+            //if(Folder.DoesExist(downloadFolder, "Sample")) { Directory.Delete(downloadFolder + @"\Sample"); }
+
+
             try {
-                if(SubfolderList.Count() > 1) { // > 1 for full Seasons (multiple episodes inside the season folder)
-                    foreach(string episodeFolder in SubfolderList) {
-                        Console.WriteLine(count++.ToString() + "/" + SubfolderList.Length.ToString());
+                if(subfolderList.Count() > 1 && !Folder.DoesExist(downloadFolder, "Sample")) { // > 1 for full Seasons (multiple episodes inside the season folder)
+                    foreach(string episodeFolder in subfolderList) {
+                        Console.WriteLine(count++.ToString() + "/" + subfolderList.Length.ToString());
 
                         Folder.DeleteNFO(episodeFolder);
-                        if(Folder.CheckForSubFolder(episodeFolder)) { Folder.MoveFiles(episodeFolder); }
+                        if(Folder.DoesExist(episodeFolder, "subs")) { Folder.MoveFiles(episodeFolder); }
                         if(Directory.GetFiles(episodeFolder).Length > 1) { MKV.Import(episodeFolder); }
                     }
                     Console.WriteLine("Script finished.");
                     return 0;
-                } else if(SubfolderList.Count() <= 1) { // < 1 for single episodes or movies
+                } else { // < 1 for single episodes or movies
                     Console.WriteLine("Movie/Episode found - starting mkvmerge");
 
                     Folder.DeleteNFO(downloadFolder);
-                    if(Folder.CheckForSubFolder(downloadFolder)) { Folder.MoveFiles(downloadFolder); }
+                    if(Folder.DoesExist(downloadFolder, "subs")) { Folder.MoveFiles(downloadFolder); }
                     if(Directory.GetFiles(downloadFolder).Length > 1) { MKV.Import(downloadFolder); }
 
                     Console.WriteLine("Script finished.");
                     return 0; // 0 -> Success
-                } else {
-                    Console.WriteLine("Script coulnd't find any subtitles to import.");
-                    return 0;
                 }
             } catch(Exception e) { Console.WriteLine(e.ToString()); return 1; }
         }
     }
     class Folder {
-        public static bool CheckForSubFolder(string episodeFolder) {
-            return Directory.Exists(episodeFolder + @"\Subs");
+        public static bool DoesExist(string path, string folder) {
+            return Directory.Exists(path + @"\" + folder);
         }
         public static void MoveFiles(string episodeFolder) {
             string subFolder = episodeFolder + @"\Subs";
@@ -96,10 +100,10 @@ namespace SubtitlesApp {
                 string[]    subtitlesIdx = Directory.GetFiles(episodeFolder, "*.idx");
                 string[]    subtitlesSub = Directory.GetFiles(episodeFolder, "*.sub");
 
-                string subtitleEngFull = mkvInputName + "-eng";
-                string subtitleEngForced = mkvInputName + "-eng-forced";
+                string subtitleEngFull = mkvInputName + "*eng";
+                string subtitleEngForced = mkvInputName + "*eng*forced";
                 string subtitleGerFull = mkvInputName;
-                string subtitleGerForced = mkvInputName + "-forced";
+                string subtitleGerForced = mkvInputName + "*forced";
 
                 string mkvmerge = "& 'C:\\Program Files\\MKVToolNix\\mkvmerge.exe' -o '" + mkvOutputPath + "' -q --no-subtitles '" + mkvInputPath + "' ";
                 if(Folder.SubfilesExist(episodeFolder, subtitleEngFull)) {
