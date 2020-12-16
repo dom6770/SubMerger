@@ -21,31 +21,35 @@ namespace SubtitlesApp {
             int count = 1;
 
             //if(Folder.DoesExist(downloadFolder, "Sample")) { Directory.Delete(downloadFolder + @"\Sample"); }
-
+            using(StreamWriter writer = new StreamWriter(@"E:\DOWNLOADS\" + args[1] + ".txt")) {
+                foreach(string subfolder in subfolderList) {
+                    writer.Write(subfolder);
+                }
+            }
 
             try {
-                if(subfolderList.Count() > 1 && !Folder.DoesExist(downloadFolder, "Sample")) { // > 1 for full Seasons (multiple episodes inside the season folder)
-                    foreach(string episodeFolder in subfolderList) {
-                        Console.WriteLine(count++.ToString() + "/" + subfolderList.Length.ToString());
+                    if(subfolderList.Count() > 1 && !Folder.DoesExist(downloadFolder, "Sample")) { // > 1 for full Seasons (multiple episodes inside the season folder)
+                        foreach(string episodeFolder in subfolderList) {
+                            Console.WriteLine("Script: mkvmerge " + count++.ToString() + "/" + subfolderList.Length.ToString());
 
-                        Folder.DeleteNFO(episodeFolder);
-                        if(Folder.DoesExist(episodeFolder, "subs")) { Folder.MoveFiles(episodeFolder); }
-                        if(Directory.GetFiles(episodeFolder).Length > 1) { MKV.Import(episodeFolder); }
+                            Folder.DeleteNFO(episodeFolder);
+                            if(Folder.DoesExist(episodeFolder, "subs")) { Folder.MoveFiles(episodeFolder); }
+                            if(Directory.GetFiles(episodeFolder).Length > 1) { MKV.Import(episodeFolder); }
+                        }
+                        Console.WriteLine("Script finished.");
+                        return 0;
+                    } else { // < 1 for single episodes or movies
+                        Console.WriteLine("Movie/Episode found - starting mkvmerge");
+
+                        Folder.DeleteNFO(downloadFolder);
+                        if(Folder.DoesExist(downloadFolder, "subs")) { Folder.MoveFiles(downloadFolder); }
+                        if(Directory.GetFiles(downloadFolder).Length > 1) { MKV.Import(downloadFolder); }
+
+                        Console.WriteLine("Script finished.");
+                        return 0; // 0 -> Success
                     }
-                    Console.WriteLine("Script finished.");
-                    return 0;
-                } else { // < 1 for single episodes or movies
-                    Console.WriteLine("Movie/Episode found - starting mkvmerge");
-
-                    Folder.DeleteNFO(downloadFolder);
-                    if(Folder.DoesExist(downloadFolder, "subs")) { Folder.MoveFiles(downloadFolder); }
-                    if(Directory.GetFiles(downloadFolder).Length > 1) { MKV.Import(downloadFolder); }
-
-                    Console.WriteLine("Script finished.");
-                    return 0; // 0 -> Success
-                }
-            } catch(Exception e) { Console.WriteLine(e.ToString()); return 1; }
-        }
+                } catch(Exception e) { Console.WriteLine(e.ToString()); return 1; }
+            }
     }
     class Folder {
         public static bool DoesExist(string path, string folder) {
@@ -132,7 +136,7 @@ namespace SubtitlesApp {
                 }
 
                 if(File.Exists(mkvOutputPath)) { File.Delete(mkvOutputPath); }
-
+                
                 RunCommand(mkvmerge);
                 Folder.RenameFile(mkvOutputPath, mkvInputPath);
                 Folder.DeleteSubtitleFiles(subtitlesIdx);
@@ -146,6 +150,7 @@ namespace SubtitlesApp {
             ProcessStartInfo cmdsi = new ProcessStartInfo("powershell.exe");
             cmdsi.Arguments = command;
             Process cmd = Process.Start(cmdsi);
+            // status output in percentage
             cmd.WaitForExit();
         }
     }
