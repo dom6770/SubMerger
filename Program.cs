@@ -3,53 +3,73 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace SubtitlesApp {
     class App {
         private static int Main(string[] args) {
-            System.Threading.Thread.Sleep(2000); //wait two seconds for SABnzbd PP
+            string   folder             = args[0];
+            string[] subfolders         = Directory.GetDirectories(folder);
+            using    StreamWriter log   = new StreamWriter(@"E:\DOWNLOAD\.scripts\logs\" + args[1] + ".log");
+            int      countEngSubs       = CountExistingSubfiles(folder);
 
-            string downloadFolder = args[0];
-            string[] subfolderList = Directory.GetDirectories(downloadFolder);
+            log.AutoFlush = true; // writes any text instantly to the file, with false it only writes when returning
+            log.WriteLine(DateTime.Now.ToString("dd.MM HH:mm:ss") + "\n - " + folder + "\n - " + subfolders.Length + " subfolders found\n");
+            log.Write("looking for full english subtitles ... ");
+            log.WriteLine(countEngSubs.ToString() + "/" + subfolders.Length + " found\n");
+            Console.WriteLine(countEngSubs.ToString() + "/" + subfolders.Length + " eng full subtitles found");
+            //Folder.WriteAllFoundSubtitles(folder, log);
 
-            Console.WriteLine("Starting...");
-            Console.WriteLine("downloadFolder: " + downloadFolder);
-            foreach(string subfolder in subfolderList) { Console.WriteLine("subfolder: " + subfolder); }
-            Console.WriteLine(subfolderList.Length + " Episodes found");
-            Console.WriteLine("   ");
-
-            int count = 1;
-
-            //if(Folder.DoesExist(downloadFolder, "Sample")) { Directory.Delete(downloadFolder + @"\Sample"); }
-            using(StreamWriter writer = new StreamWriter(@"E:\DOWNLOADS\" + args[1] + ".txt")) {
-                foreach(string subfolder in subfolderList) {
-                    writer.Write(subfolder);
-                }
-            }
+            if(countEngSubs < subfolders.Length) {
+                Console.WriteLine("WARNING! Subtitles are MISSING");
+                log.WriteLine("WARNING! Subtitles are MISSING\n");
+                Thread.Sleep(10000);
+            }  
 
             try {
-                    if(subfolderList.Count() > 1 && !Folder.DoesExist(downloadFolder, "Sample")) { // > 1 for full Seasons (multiple episodes inside the season folder)
-                        foreach(string episodeFolder in subfolderList) {
-                            Console.WriteLine("Script: mkvmerge " + count++.ToString() + "/" + subfolderList.Length.ToString());
+                int i = 0;
+            
+                if(subfolders.Length > 1 && !Folder.DoesExist(folder, "Sample")) { // #1: Check for multiple folders (indicates a full season) #2: If a sample folder exists it's more likely a movie or single episode
+                    foreach(string episodeFolder in subfolders) {
+                        i++;
+                        log.Write("mkvmerge: #" + i.ToString() + " of " + subfolders.Length.ToString() + " (" + episodeFolder.Remove(0, folder.Length).Remove(0,1) + ")");
+                        Console.Write("mkvmerge: #" + i.ToString() + " of " + subfolders.Length.ToString() + " (" + episodeFolder.Remove(0, folder.Length).Remove(0,1) + ")");
 
-                            Folder.DeleteNFO(episodeFolder);
-                            if(Folder.DoesExist(episodeFolder, "subs")) { Folder.MoveFiles(episodeFolder); }
-                            if(Directory.GetFiles(episodeFolder).Length > 1) { MKV.Import(episodeFolder); }
-                        }
-                        Console.WriteLine("Script finished.");
-                        return 0;
-                    } else { // < 1 for single episodes or movies
-                        Console.WriteLine("Movie/Episode found - starting mkvmerge");
-
-                        Folder.DeleteNFO(downloadFolder);
-                        if(Folder.DoesExist(downloadFolder, "subs")) { Folder.MoveFiles(downloadFolder); }
-                        if(Directory.GetFiles(downloadFolder).Length > 1) { MKV.Import(downloadFolder); }
-
-                        Console.WriteLine("Script finished.");
-                        return 0; // 0 -> Success
+                        //Folder.DeleteNFO(episodeFolder);
+                        //if(Folder.DoesExist(episodeFolder, "subs")) { Folder.MoveFiles(episodeFolder); }
+                        //if(Directory.GetFiles(episodeFolder).Length > 1) { MKV.Import(episodeFolder); }
+                        log.Write("\tcompleted\n");
+                        Console.Write("\tcompleted\n");
                     }
-                } catch(Exception e) { Console.WriteLine(e.ToString()); return 1; }
-            }
+
+                    log.Write("\ndone");
+                    Console.Write("done");
+                    return 0;
+                } else { // < 1 for single episodes or movies
+                    log.WriteLine("Movie/Episode found - starting mkvmerge");
+                    Console.WriteLine("Movie/Episode found - starting mkvmerge");
+
+                    //Folder.DeleteNFO(folder);
+                    //if(Folder.DoesExist(folder, "subs")) { Folder.MoveFiles(folder); }
+                    //if(Directory.GetFiles(folder).Length > 1) { MKV.Import(folder); }
+
+                    log.Write("\ndone");
+                    Console.Write("done");
+                    return 0; // 0 -> Success
+                }
+            } catch(Exception e) { log.WriteLine(e.ToString()); return 1; }
+
+            //return 0;
+        }
+
+        public static int CountExistingSubfiles(string folder) {
+            int countEngSubs = 0;
+            foreach(string subfolder in Directory.GetDirectories(folder))
+                if(Directory.Exists(subfolder + @"\Subs\"))
+                    foreach(string subsfolder in Directory.GetFiles(subfolder + @"\Subs", "*eng.sub"))
+                        countEngSubs++;
+            return countEngSubs;
+        }
     }
     class Folder {
         public static bool DoesExist(string path, string folder) {
@@ -93,6 +113,13 @@ namespace SubtitlesApp {
         }
         public static bool SubfilesExist(string episodeFolder, string wildcard) {
             return Directory.GetFiles(episodeFolder, wildcard + ".idx").Any() && Directory.GetFiles(episodeFolder, wildcard + ".sub").Any();
+        }
+        public static void WriteAllFoundSubtitles(string folder, StreamWriter log) {
+            foreach(string subfolder in Directory.GetDirectories(folder))
+                if(Directory.Exists(subfolder + @"\Subs\"))
+                    foreach(string subsfolder in Directory.GetFiles(subfolder + @"\Subs", "*eng.sub"))
+                        log.WriteLine(subsfolder.Remove(0, subfolder.Length).Remove(0, 6));
+            log.Write("\n");
         }
     }
     class MKV {
@@ -142,9 +169,6 @@ namespace SubtitlesApp {
                 Folder.DeleteSubtitleFiles(subtitlesIdx);
                 Folder.DeleteSubtitleFiles(subtitlesSub);
             } catch(Exception e) { Console.WriteLine(e.ToString()); }
-        }
-        public static void BuildCommand(string episodeFolder) {
-
         }
         public static void RunCommand(string command) {
             ProcessStartInfo cmdsi = new ProcessStartInfo("powershell.exe");
