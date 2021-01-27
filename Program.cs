@@ -12,11 +12,12 @@ class Script {
         //                                  args[0] = folder                   |              subfolder   
 
         string path = args[0];
+        string name = args.Length == 2 ? args[1] : DateTime.Now.ToString("dd-MM_HH-mm");
+
         string[] subfolders = Directory.GetDirectories(path);
         Array.Sort(subfolders); // sorts from A-Z to have a correct episode order
 
-        using StreamWriter log = new StreamWriter(@"E:\DOWNLOAD\.scripts\logs\" + args[1] + ".log");
-
+        using StreamWriter log = new StreamWriter(@"E:\DOWNLOAD\.scripts\logs\" + name + ".log");
         log.AutoFlush = true; // writes any text instantly to the file, with false it only writes when returning
         Output.WriteLine(log, "Start Time: " + DateTime.Now.ToString("dd.MM HH:mm:ss") + "\n - " + path + "\\(" + subfolders.Length + ")\n");
 
@@ -40,7 +41,7 @@ class Script {
                 }
 
                 Output.Write(log, "Script finished");
-                return 0;
+                return 0; // 0 -> Success
             } else { // < 1 for single episodes or movies
                 Output.WriteLine(log, DateTime.Now.ToString("HH:mm:ss") + " (S) mkvmerge in progress");
                 if(Directory.Exists(path + @"\Subs")) { Folder.MoveFiles(path); }
