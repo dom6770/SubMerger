@@ -17,8 +17,9 @@ class Script {
         string[] subfolders = Directory.GetDirectories(path);
         Array.Sort(subfolders); // sorts from A-Z to have a correct episode order
 
-        using StreamWriter log = new StreamWriter(@"E:\DOWNLOAD\.scripts\logs\" + name + ".log");
-        log.AutoFlush = true; // writes any text instantly to the file, with false it only writes when returning
+        using StreamWriter log = new StreamWriter(@"E:\DOWNLOAD\.scripts\logs\" + name + ".log") {
+            AutoFlush = true // writes any text instantly to the file, with false it only writes when returning
+        };
         Output.WriteLine(log, "Start Time: " + DateTime.Now.ToString("dd.MM HH:mm:ss") + "\n - " + path + "\\(" + subfolders.Length + ")\n");
 
         try {
