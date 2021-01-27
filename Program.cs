@@ -12,7 +12,7 @@ class Script {
         //                                  args[0] = folder                   |              subfolder   
 
         string path = args[0];
-        string name = args.Length == 2 ? args[1] : DateTime.Now.ToString("dd-MM_HH-mm");
+        string name = args.Length > 1 ? args[1] : DateTime.Now.ToString("dd-MM_HH-mm");
 
         using StreamWriter log = new StreamWriter(@"E:\DOWNLOAD\.scripts\logs\" + name + ".log") {
             AutoFlush = true // writes any text instantly to the file, with false it only writes when returning
