@@ -11,83 +11,68 @@ class Script {
         // COMPLETE E:\DOWNLOAD\TestSeries.S01.German.1080p.BluRay.x264-RAiNBOW\Test.S01E01.German.1080p.BluRay.x264-RAiNBOW\*.mkv
         //                                  args[0] = folder                   |              subfolder   
 
-        string root = args[0];
-        string[] subfolders = Directory.GetDirectories(root);
+        string path = args[0];
+        string[] subfolders = Directory.GetDirectories(path);
         using StreamWriter log = new StreamWriter(@"E:\DOWNLOAD\.scripts\logs\" + args[1] + ".log");
 
         Array.Sort(subfolders); // sorts from A-Z to have a correct episode order
 
         log.AutoFlush = true; // writes any text instantly to the file, with false it only writes when returning
-        log.WriteLine("Start Time: " + DateTime.Now.ToString("dd.MM HH:mm:ss") + "\n - " + root + "\\(" + subfolders.Length + ")\n");
+        Output.WriteLine(log, "Start Time: " + DateTime.Now.ToString("dd.MM HH:mm:ss") + "\n - " + path + "\\(" + subfolders.Length + ")\n");
 
         try {
             int i = 0;
-            if(subfolders.Length > 1 && !Directory.Exists(root + @"\Sample")) { // #1: Check for multiple folders (indicates a full season) #2: If a sample folder exists it's more likely a movie or single episode
-                int countEngSubs = Folder.CountExistingSubfiles(root);
+            if(subfolders.Length > 1 && !Directory.Exists(path + @"\Sample")) { // #1: Check for multiple folders (indicates a full season) #2: If a sample folder exists it's more likely a movie or single episode
+                int countEngSubs = Folder.CountExistingSubfiles(path);
 
                 if(countEngSubs != subfolders.Length) {
                     int missingSubs = subfolders.Length - countEngSubs;
-                    Console.WriteLine("WARNING! Subtitles are MISSING (" + missingSubs + ")");
-                    log.WriteLine("WARNING! Subtitles are MISSING (MISSING: " + missingSubs + ") (FOUND: " + countEngSubs + ", TOTAL: " + subfolders.Length + ")");
+                    Output.WriteLine(log, "WARNING! Subtitles are MISSING (MISSING: " + missingSubs + ") (FOUND: " + countEngSubs + ", TOTAL: " + subfolders.Length + ")");
                     Folder.WriteAllMissingSubtitles(subfolders, log);
                     Thread.Sleep(10000);
                 }
 
                 foreach(string episodeFolder in subfolders) {
                     i++;
-                    log.Write(DateTime.Now.ToString("HH:mm:ss") + " | (M) mkvmerge: #" + i.ToString() + " of " + subfolders.Length + " \t(" + episodeFolder.Remove(0, root.Length).Remove(0, 1) + ")\t");
-                    Console.Write("(M) mkvmerge: #" + i.ToString() + " of " + subfolders.Length + " (" + episodeFolder.Remove(0, root.Length).Remove(0, 1) + ")");
-
-                    Folder.DeleteNFO(episodeFolder);
+                    Output.WriteLine(log, DateTime.Now.ToString("HH:mm:ss") + " | (M) mkvmerge: #" + i.ToString() + " of " + subfolders.Length + " \t(" + episodeFolder.Remove(0, path.Length).Remove(0, 1) + ")\t");
                     if(Directory.Exists(episodeFolder + @"\Subs")) { Folder.MoveFiles(episodeFolder); }
                     if(Directory.GetFiles(episodeFolder).Length > 1) { mkvmerge.Start(episodeFolder); }
-
-                    log.Write("\tcompleted\n");
-                    Console.Write("\tcompleted\n");
+                    Output.Write(log, "\tcompleted\n");
                 }
 
-                log.Write("\ndone");
-                Console.Write("done");
+                Output.Write(log, "Script finished");
                 return 0;
             } else { // < 1 for single episodes or movies
-                log.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " (S) mkvmerge in progress");
-                Console.WriteLine("(S) mkvmerge in progress");
-
-                Folder.DeleteNFO(root);
-                if(Directory.Exists(root + @"\Subs")) { Folder.MoveFiles(root); }
-                if(Directory.GetFiles(root).Length > 1) { mkvmerge.Start(root); }
-
-                log.Write("\n" + DateTime.Now.ToString("dd.MM HH:mm:ss") + "done");
-                Console.Write("done");
+                Output.WriteLine(log, DateTime.Now.ToString("HH:mm:ss") + " (S) mkvmerge in progress");
+                if(Directory.Exists(path + @"\Subs")) { Folder.MoveFiles(path); }
+                if(Directory.GetFiles(path).Length > 1) { mkvmerge.Start(path); }
+                Output.Write(log, "\n" + DateTime.Now.ToString("HH:mm:ss") + " done");
                 return 0; // 0 -> Success
             }
         } catch(Exception e) { log.WriteLine(e.ToString()); return 1; }
     }
 }
+class Output {
+    public static void Write(StreamWriter log, string output) {
+        Console.Write(output);
+        log.Write(output);
+    }
+    public static void WriteLine(StreamWriter log, string output) {
+        Console.WriteLine(output);
+        log.WriteLine(output);
+    }
+}
 class Folder {
     public static void MoveFiles(string episodeFolder) {
         string subFolder = episodeFolder + @"\Subs";
-
         try {
             IEnumerable<FileInfo> files = Directory.GetFiles(subFolder).Select(f => new FileInfo(f));
-
-            foreach(var file in files) {
-                File.Move(file.FullName, Path.Combine(episodeFolder, file.Name));
-            }
-
-            if(IsDirectoryEmpty(subFolder)) {
-                Directory.Delete(subFolder);
-            };
+            foreach(var file in files) {File.Move(file.FullName, Path.Combine(episodeFolder, file.Name));}
+            if(IsDirectoryEmpty(subFolder)) {Directory.Delete(subFolder);};
         } catch(Exception e) { Console.WriteLine(e.ToString()); }
-
     }
     public static bool IsDirectoryEmpty(string path) {
         return !Directory.EnumerateFileSystemEntries(path).Any();
-    }
-    public static void DeleteNFO(string episodeFolder) {
-        try {
-            foreach(string nfo in Directory.EnumerateFiles(episodeFolder, "*.nfo")) { File.Delete(nfo); }
-        } catch(Exception e) { Console.WriteLine(e.ToString()); };
     }
     public static void RenameFile(string from, string to) {
         if(File.Exists(from) && File.Exists(to)) {
@@ -96,9 +81,7 @@ class Folder {
         }
     }
     public static void DeleteSubtitleFiles(string[] subFiles) {
-        foreach(string subFile in subFiles) {
-            File.Delete(subFile);
-        }
+        foreach(string subFile in subFiles) {File.Delete(subFile);}
     }
     public static bool SubfilesExist(string episodeFolder, string wildcard) {
         return Directory.GetFiles(episodeFolder, wildcard + ".idx").Any() && Directory.GetFiles(episodeFolder, wildcard + ".sub").Any();
@@ -159,7 +142,6 @@ class mkvmerge {
             }
 
             if(File.Exists(mkvOutputPath)) { File.Delete(mkvOutputPath); }
-
             RunCommand(mkvmerge);
             Folder.RenameFile(mkvOutputPath, mkvInputPath);
             Folder.DeleteSubtitleFiles(subtitlesIdx);
