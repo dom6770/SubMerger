@@ -19,10 +19,9 @@ class Script {
         };
         
         try {
-            Output.WriteLine(log, "Start Time: " + DateTime.Now.ToString("dd.MM HH:mm:ss") + "\n - " + path + "\\(" + subfolders.Length + ")\n");
-
             string[] subfolders = Directory.GetDirectories(path);
             Array.Sort(subfolders); // sorts from A-Z to have a correct episode order
+            Output.WriteLine(log, "Start Time: " + DateTime.Now.ToString("dd.MM HH:mm:ss") + "\n - " + path + "\\(" + subfolders.Length + ")\n");
 
             int i = 0;
             if(subfolders.Length > 1 && !Directory.Exists(path + @"\Sample")) { // #1: Check for multiple folders (indicates a full season) #2: If a sample folder exists it's more likely a movie or single episode
