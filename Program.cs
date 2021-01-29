@@ -85,12 +85,9 @@ class Folder {
             try {
                 IEnumerable<FileInfo> files = Directory.GetFiles(subtitlesPath).Select(f => new FileInfo(f));       // get every file from the
                 foreach(var file in files) { File.Move(file.FullName, Path.Combine(inputPath, file.Name)); }
-                if(IsDirectoryEmpty(subtitlesPath)) { Directory.Delete(subtitlesPath); };
+                if(!Directory.EnumerateFileSystemEntries(subtitlesPath).Any()) { Directory.Delete(subtitlesPath); };
             } catch(Exception e) { Console.WriteLine(e.ToString()); }
         }
-    }
-    public static bool IsDirectoryEmpty(string path) {
-        return !Directory.EnumerateFileSystemEntries(path).Any();
     }
     public static void RenameFile(string from, string to) {
         if(File.Exists(from) && File.Exists(to)) {
