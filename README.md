@@ -1,2 +1,6 @@
-# mkvmerge subtitle tool for SABnzbd
-This tool provides an application for SABnzbd merging external subtitles into the mkv. 
+# SubMerger
+SubMerger is a SABnzbd script for merging external subtitles into the mkv file.
+## Installation
+TBC
+## Planned Features
+TBC
