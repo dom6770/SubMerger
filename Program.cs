@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 
-class Script {
+class SubMerger {
     private static int Main(string[] args) {
         // MOVIE/SE E:\DOWNLOAD\TestMovie.2018.German.1080p.BluRay.x264-RAiNBOW\*.mkv                                                      (maybe folder Subs and Sample!) (subfolders >= 2)
         // COMPLETE E:\DOWNLOAD\TestSeries.S01.German.1080p.BluRay.x264-RAiNBOW\Test.S01E01.German.1080p.BluRay.x264-RAiNBOW\*.mkv
@@ -14,28 +14,30 @@ class Script {
         string path = args[0];
         string name = args.Length > 1 ? args[1] : DateTime.Now.ToString("dd-MM_HH-mm");
 
-        using StreamWriter log = new StreamWriter(@"E:\DOWNLOAD\.scripts\logs\" + name + ".log") {
+        using StreamWriter log = new StreamWriter(path + name + ".log") {
             AutoFlush = true // writes any text instantly to the file, with false it only writes when returning
         };
         
         try {
-            string[] subfolders = Directory.GetDirectories(path);
-            Array.Sort(subfolders); // sorts from A-Z to have a correct episode order
-            Output.WriteLine(log, "Start Time: " + DateTime.Now.ToString("dd.MM HH:mm:ss") + "\n - " + path + "\\(" + subfolders.Length + ")\n");
+            string[] dirArray = Directory.GetDirectories(path);
+            int dirArrayCount = dirArray.Length;
+            Array.Sort(dirArray); // sorts from A-Z to have a correct episode order
+            Output.WriteLine(log, "Start Time: " + DateTime.Now.ToString("dd.MM HH:mm:ss") + "\n - " + path + "\\(" + dirArrayCount + ")\n");
 
             int i = 0;
-            if(subfolders.Length > 1 && !Directory.Exists(path + @"\Sample")) { // #1: Check for multiple folders (indicates a full season) #2: If a sample folder exists it's more likely a movie or single episode
+            if(dirArrayCount > 1 && !Directory.Exists(path + @"\Sample")) { // #1: Check for multiple folders (indicates a full season) #2: If a sample folder exists it's more likely a movie or single episode
                 int countEngSubs = Folder.CountExistingSubfiles(path);
 
-                if(countEngSubs != subfolders.Length) {
-                    int missingSubs = subfolders.Length - countEngSubs;
-                    Output.WriteLine(log, "WARNING! Subtitles are MISSING (MISSING: " + missingSubs + ") (FOUND: " + countEngSubs + ", TOTAL: " + subfolders.Length + ")");
-                    Folder.WriteAllMissingSubtitles(subfolders, log);
+                if(countEngSubs != dirArrayCount) {
+                    int missingSubs = dirArrayCount - countEngSubs;
+                    Output.WriteLine(log, "WARNING! Subtitles are MISSING (MISSING: " + missingSubs + ") (FOUND: " + countEngSubs + ", TOTAL: " + dirArrayCount + ")");
+                    Folder.WriteAllMissingSubtitles(dirArray, log);
                 }
 
-                foreach(string episodeFolder in subfolders) {
+                foreach(string episodeFolder in dirArray) {
                     i++;
-                    Output.WriteLine(log, DateTime.Now.ToString("HH:mm:ss") + " | (M) mkvmerge: #" + i.ToString() + " of " + subfolders.Length + " \t(" + episodeFolder.Remove(0, path.Length).Remove(0, 1) + ")\t");
+                    Output.WriteLine(log, DateTime.Now.ToString("HH:mm:ss") + " | (M) mkvmerge: #" + i.ToString() + " of " + dirArrayCount + " \t(" + episodeFolder.Remove(0, path.Length).Remove(0, 1) + ")\t");
+                    Folder.MoveSubs(episodeFolder);
                     if(Directory.Exists(episodeFolder + @"\Subs")) { Folder.MoveFiles(episodeFolder); }
                     if(Directory.GetFiles(episodeFolder).Length > 1) { mkvmerge.Start(episodeFolder); }
                     Output.Write(log, "\tcompleted\n");
@@ -45,7 +47,8 @@ class Script {
                 return 0; // 0 -> Success
             } else { // < 1 for single episodes or movies
                 Output.WriteLine(log, DateTime.Now.ToString("HH:mm:ss") + " (S) mkvmerge in progress");
-                if(Directory.Exists(path + @"\Subs")) { Folder.MoveFiles(path); }
+                // moves all subtitles files to the root of the mkv
+                Folder.MoveSubs(path);
                 if(Directory.GetFiles(path).Length > 1) { mkvmerge.Start(path); }
                 Output.Write(log, "\n" + DateTime.Now.ToString("HH:mm:ss") + " done");
                 return 0; // 0 -> Success
@@ -64,6 +67,16 @@ class Output {
     }
 }
 class Folder {
+    public static void MoveSubs(string inputPath) {
+        string subtitlesPath = inputPath + @"\Subs";
+        if(Directory.Exists(subtitlesPath)) {
+            try {
+                IEnumerable<FileInfo> files = Directory.GetFiles(subtitlesPath).Select(f => new FileInfo(f));       // get every file from the
+                foreach(var file in files) { File.Move(file.FullName, Path.Combine(inputPath, file.Name)); }
+                if(IsDirectoryEmpty(subtitlesPath)) { Directory.Delete(subtitlesPath); };
+            } catch(Exception e) { Console.WriteLine(e.ToString()); }
+        }
+    }
     public static void MoveFiles(string episodeFolder) {
         string subFolder = episodeFolder + @"\Subs";
         try {

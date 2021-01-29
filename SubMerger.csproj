@@ -3,10 +3,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <StartupObject>Script</StartupObject>
     <DebugType>embedded</DebugType>
-    <AssemblyName>SABnzbd_MSMS</AssemblyName>
-    <RootNamespace>SABnzbd_MSMS</RootNamespace>
+    <StartupObject>SubMerger</StartupObject>
+    <AssemblyName>SubMerger</AssemblyName>
+    <RootNamespace>SubMerger</RootNamespace>
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
