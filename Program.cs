@@ -11,7 +11,7 @@ class SubMerger {
         // COMPLETE E:\DOWNLOAD\TestSeries.S01.German.1080p.BluRay.x264-RAiNBOW\Test.S01E01.German.1080p.BluRay.x264-RAiNBOW\*.mkv
         //                                  args[0] = folder                   |              subfolder   
 
-²²        // arguments
+        // arguments
         string inputPath = args[0];
         string inputName = args.Length > 1 ? args[1] : DateTime.Now.ToString("dd-MM_HH-mm");
 
@@ -21,7 +21,7 @@ class SubMerger {
         Array.Sort(dirArray);                                  // sorts from A-Z to have a correct episode order
 
         // logger
-        using StreamWriter log = new StreamWriter(@"E:\DOCUMENTS\SubMerger\" + inputName + ".log") {
+        using StreamWriter log = new StreamWriter(@"E:\TOOLS\SABnzbd\logs\" + inputName + ".log") {
             AutoFlush = true // writes any text instantly to the file, with false it only writes when returning
         };
 
@@ -60,9 +60,9 @@ class SubMerger {
             } else if(!isSeasonFolder) {
                 Output.WriteInfo(log, inputPath);
 
-                if(Directory.Exists(inputPath + @"\Subs")) {
+                if(Directory.Exists(inputPath + @"\Subs") || Directory.GetFiles(inputPath, "*.sub").Any()) {
                     Output.WriteLine(log, DateTime.Now.ToString("HH:mm:ss") + " | (S) mkvmerge in progress");
-                    Folder.MoveSubsToRoot(inputPath);
+                    if(Directory.Exists(inputPath + @"\Subs")) Folder.MoveSubsToRoot(inputPath);
                     mkvmerge.Start(inputPath);
                     Output.WriteLine(log, DateTime.Now.ToString("HH:mm:ss") + " | (S) mkvmerge done");
                     return 0;
@@ -225,19 +225,20 @@ class mkvmerge {
                             + Directory.GetFiles(episodeFolder, subtitleEngForced + ".sub")[0] + "' ";
             }
             if(Folder.SubfilesExist(episodeFolder, subtitleGerFull)) {
-                mkvmerge += "--language 0:ger " +
+                mkvmerge += "--language 0:deu " +
                             "--track-name 0:Full '"
                             + Directory.GetFiles(episodeFolder, subtitleGerFull + ".idx")[0] + "' '"
                             + Directory.GetFiles(episodeFolder, subtitleGerFull + ".sub")[0] + "' ";
             }
             if(Folder.SubfilesExist(episodeFolder, subtitleGerForced)) {
-                mkvmerge += "--language 0:ger " +
+                mkvmerge += "--language 0:deu " +
                             "--track-name 0:Forced '"
                             + Directory.GetFiles(episodeFolder, subtitleGerForced + ".idx")[0] + "' '"
                             + Directory.GetFiles(episodeFolder, subtitleGerForced + ".sub")[0] + "' ";
             }
 
             if(File.Exists(mkvOutputPath)) { File.Delete(mkvOutputPath); }
+            Console.WriteLine(mkvmerge);
             RunCommand(mkvmerge);
             Folder.RenameFile(mkvOutputPath, mkvInputPath);
             Folder.DeleteSubtitleFiles(subtitlesIdx);
