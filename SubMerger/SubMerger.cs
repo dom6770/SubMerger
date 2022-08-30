@@ -74,6 +74,9 @@ class SubMerger {
                     Output.WriteLine(log,"Exiting...");
                     return 0;
                 }
+            } else {
+                Output.WriteLine(log,"Error, could not determine type!");
+                return 1;
             }
         }
         catch(Exception e) {
