@@ -83,7 +83,6 @@ class SubMerger {
             Output.WriteLine(log,e.ToString());
             return 1;
         };
-        return 1;
     }
 
 }
