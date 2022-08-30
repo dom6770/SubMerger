@@ -48,7 +48,7 @@ class SubMerger {
                     progress++;
                     Output.Write(log,DateTime.Now.ToString("HH:mm:ss") + " | (M) mkvmerge: #" + progress.ToString("00") + " of " + queue.Count + " \t(" + Regex.Match(item,@"E[0-9]{2}").Groups[0].Value + ")\t");
                     Folder.MoveSubsToRoot(item);
-                    mkvmerge.Start(item);
+                    mkvmerge.Initialize(item);
                     log.Write("\tcompleted\n");
                     Console.WriteLine("\ncompleted");
                 }
@@ -67,7 +67,7 @@ class SubMerger {
                 if(Directory.Exists(inputPath + @"\Subs")) {
                     Output.WriteLine(log,DateTime.Now.ToString("HH:mm:ss") + " | (S) mkvmerge in progress");
                     Folder.MoveSubsToRoot(inputPath);
-                    mkvmerge.Start(inputPath);
+                    mkvmerge.Initialize(inputPath);
                     Output.WriteLine(log,DateTime.Now.ToString("HH:mm:ss") + " | (S) mkvmerge done");
                     return 0;
                 } else {

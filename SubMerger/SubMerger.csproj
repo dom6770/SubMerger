@@ -11,7 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="SubMerger\" />
+    <Compile Remove="SubMerger\**" />
+    <EmbeddedResource Remove="SubMerger\**" />
+    <None Remove="SubMerger\**" />
   </ItemGroup>
 
 </Project>

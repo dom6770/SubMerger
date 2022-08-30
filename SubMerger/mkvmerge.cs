@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 
 class mkvmerge {
-    public static void Start(string episodeFolder) {
+    public static void Initialize(string episodeFolder) {
         try {
             string mkvInputPath = Directory.GetFiles(episodeFolder, "*.mkv").First();
             string mkvInputName = Path.GetFileNameWithoutExtension(mkvInputPath);
