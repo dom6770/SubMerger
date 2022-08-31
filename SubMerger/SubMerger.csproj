@@ -1,19 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <DebugType>embedded</DebugType>
-    <StartupObject>SubMerger</StartupObject>
+    <StartupObject>Program</StartupObject>
     <AssemblyName>SubMerger</AssemblyName>
     <RootNamespace>SubMerger</RootNamespace>
-    <ApplicationIcon>app.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="SubMerger\**" />
     <EmbeddedResource Remove="SubMerger\**" />
     <None Remove="SubMerger\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\app.ico" />
   </ItemGroup>
 
 </Project>
