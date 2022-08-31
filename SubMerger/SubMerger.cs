@@ -46,8 +46,8 @@ class SubMerger {
                 }
 
                 if(progress == 0 && queue.Count == 0) {
-                    Console.WriteLine("Exiting...");
-                    return 0;
+                    Console.WriteLine("No files found. Exiting...");
+                    return 1;
                 } else if(progress == queue.Count) {
                     Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " | (M) mkvmerge done");
                     return 0; // 0 -> Success
