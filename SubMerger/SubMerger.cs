@@ -4,10 +4,22 @@ using System.Text.RegularExpressions;
 using System;
 
 class SubMerger {
-    public string inputPath { get; set; }
-    public string inputName { get; set; }
+    public string Path { get; set; }
+    public string FolderName { get; set; }
+    public string[] SubfoldersList { get; set; }
+    public bool IsSeasonFolder { get; set; }
 
-    public int Run(string[] args) {
+    public SubMerger(string argPath, string argName) {
+        Path = argPath;
+        FolderName = argName;
+
+        SubfoldersList = Directory.GetDirectories(Path);
+        Array.Sort(SubfoldersList);
+
+        IsSeasonFolder = Regex.Match(Path,@"S[0-9]{2}[^E]").Success ? true : false;
+    }
+
+    public int Run() {
         // MOVIE/SE E:\DOWNLOAD\TestMovie.2018.German.1080p.BluRay.x264-RAiNBOW\*.mkv                                                      (maybe folder Subs and Sample!) (subfolders >= 2)
         // COMPLETE E:\DOWNLOAD\TestSeries.S01.German.1080p.BluRay.x264-RAiNBOW\Test.S01E01.German.1080p.BluRay.x264-RAiNBOW\*.mkv
         //                                  args[0] = folder                   |              subfolder   
@@ -16,25 +28,14 @@ class SubMerger {
         // args[0] should be path to the movie/season folder
         // args[1] should be the folder name of the media
 
-        //string inputPath = args[0];
-        //string inputName = args.Length > 1 ? args[1] : DateTime.Now.ToString("dd-MM_HH-mm");
-
-        // other variables
-        string[] subfolders = Directory.GetDirectories(inputPath); // get all folders in the path
-        int subfoldersCount = subfolders.Length;                    // amount of folders
-        Array.Sort(subfolders);                                  // sorts from A-Z to have a correct episode order
-
-        // determine the type of media (single mkv or multiple episodes) by matching a regex for S0x.
-        bool isSeasonFolder = Regex.Match(inputPath, @"S[0-9]{2}[^E]").Success ? true : false;
-
         // Header
-        Output.WriteHeader(inputPath,subfoldersCount);
+        Output.WriteHeader(Path, SubfoldersList.Length);
 
         try {
-            if(isSeasonFolder) {
-                Output.WriteSeasonInfo(inputPath);
+            if(IsSeasonFolder) {
+                Output.WriteSeasonInfo(Path);
 
-                List<string> queue = Folder.GetQueue(inputPath);
+                List<string> queue = Folder.GetQueue(Path);
                 int progress = 0;
 
                 foreach(string item in queue) {
@@ -53,14 +54,14 @@ class SubMerger {
                     return 0; // 0 -> Success
                 } else return 1;
 
-            } else if(!isSeasonFolder) {
-                Output.WriteInfo(inputPath);
+            } else if(!IsSeasonFolder) {
+                Output.WriteInfo(Path);
 
-                if(Directory.Exists(inputPath + @"\Subs")) {
-                    Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " | (S) mkvmerge in progress");
-                    Folder.MoveSubsToRoot(inputPath);
-                    mkvmerge.Initialize(inputPath);
-                    Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " | (S) mkvmerge done");
+                if(Directory.Exists(Path + @"\Subs")) {
+                    Console.WriteLine("{0} | (S) mkvmerge in progress", DateTime.Now.ToString("HH:mm:ss"));
+                    Folder.MoveSubsToRoot(Path);
+                    mkvmerge.Initialize(Path);
+                    Console.WriteLine("{0} | (S) mkvmerge done", DateTime.Now.ToString("HH:mm:ss"));
                     return 0;
                 } else {
                     Console.WriteLine("Exiting...");

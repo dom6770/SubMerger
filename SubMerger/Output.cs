@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 
 class Output {
+
     public static void WriteHeader(string inputPath, int subfoldersCount) {
         Console.Write(
         "Start Time: " + DateTime.Now.ToString("ddd dd.MM.yyyy HH:mm:ss") +
@@ -17,6 +18,7 @@ class Output {
         int amountSubFullEng = Folder.CountFullEngSubfiles(inputPath);
         int amountSubMissingEng = amountSubTotal - amountSubFullEng;
         int amountSubMissing = dirArray.Length - amountSubTotal;
+
 
         // Header - Type
         Console.WriteLine("Season");
