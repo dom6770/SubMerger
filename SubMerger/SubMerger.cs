@@ -21,17 +21,14 @@ class SubMerger {
 
         // other variables
         string[] subfolders = Directory.GetDirectories(inputPath); // get all folders in the path
-        int dirArrayCount = subfolders.Length;                    // amount of folders
+        int subfoldersCount = subfolders.Length;                    // amount of folders
         Array.Sort(subfolders);                                  // sorts from A-Z to have a correct episode order
 
         // determine the type of media (single mkv or multiple episodes) by matching a regex for S0x.
         bool isSeasonFolder = Regex.Match(inputPath, @"S[0-9]{2}[^E]").Success ? true : false;
 
         // Header
-        Console.Write(
-            "Start Time: " + DateTime.Now.ToString("ddd dd.MM.yyyy HH:mm:ss") +
-            "\n|- Folder: " + inputPath + "\\(" + dirArrayCount + ")" +
-            "\n|- Type: ");
+        Output.WriteHeader(inputPath,subfoldersCount);
 
         try {
             if(isSeasonFolder) {

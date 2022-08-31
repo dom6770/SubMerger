@@ -4,6 +4,13 @@ using System;
 using System.Linq;
 
 class Output {
+    public static void WriteHeader(string inputPath, int subfoldersCount) {
+        Console.Write(
+        "Start Time: " + DateTime.Now.ToString("ddd dd.MM.yyyy HH:mm:ss") +
+        "\n|- Folder: " + inputPath + "\\(" + subfoldersCount + ")" +
+        "\n|- Type: ");
+    }
+
     public static void WriteSeasonInfo(string inputPath) {
         string[] dirArray = Directory.GetDirectories(inputPath);
         int amountSubTotal = Folder.CountSubtitlesTotal(inputPath);
