@@ -44,7 +44,7 @@ class mkvmerge {
             }
 
             if(File.Exists(mkvOutputPath)) { File.Delete(mkvOutputPath); }
-            RunCommand(@"& 'C:\Program Files\MKVToolNix\mkvmerge.exe'" + mkvmergeArgs);
+            Run(@"& 'C:\Program Files\MKVToolNix\mkvmerge.exe'" + mkvmergeArgs);
             Folder.RenameFile(mkvOutputPath,mkvInputPath);
             Folder.DeleteSubtitleFiles(subtitlesIdx);
             Folder.DeleteSubtitleFiles(subtitlesSub);
@@ -53,7 +53,7 @@ class mkvmerge {
             Console.WriteLine(e.ToString());
         }
     }
-    public static void RunCommand(string command) {
+    public static void Run(string command) {
         ProcessStartInfo cmdsi = new ProcessStartInfo("powershell.exe");
         cmdsi.Arguments = command;
         Process cmd = Process.Start(cmdsi);

@@ -6,7 +6,7 @@ using System.Linq;
 class Folder {
     public static List<string> GetQueue(string inputPath) {
         string[] dirArray = Directory.GetDirectories(inputPath);
-        List<string> queue = new List<string>();
+        List<string> queue = new();
         foreach(string dir in dirArray) {
             if(Directory.Exists(dir + @"\Subs") && Directory.GetFiles(dir + @"\Subs\","*eng.*").Any())
                 queue.Add(dir);
