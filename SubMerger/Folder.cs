@@ -8,7 +8,7 @@ class Folder {
         string[] dirArray = Directory.GetDirectories(inputPath);
         List<string> queue = new();
         foreach(string dir in dirArray) {
-            if(Directory.Exists(dir + @"\Subs") && Directory.GetFiles(dir + @"\Subs\","*eng.*").Any())
+            if(Directory.Exists(dir + @"\Subs") && Directory.GetFiles(dir + @"\Subs\","*eng*").Any())
                 queue.Add(dir);
         };
         return queue;
