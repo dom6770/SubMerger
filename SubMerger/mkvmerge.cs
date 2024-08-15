@@ -2,14 +2,10 @@
 using System.IO;
 using System;
 using System.Linq;
-using System.Text.Json;
 
 class mkvmerge {
-    private static string _mkvMergePath;
-    private static string _pwshPath;
     public static void Initialize(string episodeFolder) {
         try {
-            LoadConfig("config.json");
             string mkvInputPath = Directory.GetFiles(episodeFolder, "*.mkv").First();
             string mkvInputName = Path.GetFileNameWithoutExtension(mkvInputPath);
             string mkvOutputPath = mkvInputPath.Remove(mkvInputPath.Length - 4, 4); mkvOutputPath += "_new.mkv";
@@ -58,24 +54,11 @@ class mkvmerge {
         }
     }
     public static void Run(string mkvmergeArgs) {
-        ProcessStartInfo command = new(_pwshPath) {
-            Arguments = $"-command \"& {_mkvMergePath} {mkvmergeArgs}\""
+        ProcessStartInfo command = new("pwsh") {
+            Arguments = $"-command \"& mkvmerge {mkvmergeArgs}\""
         };
         // Console.WriteLine("ProcessStartInfo: " + command.Arguments);
         Process pwsh = Process.Start(command);
         pwsh.WaitForExit();
-    }
-    private static void LoadConfig(string configFilePath) {
-        if(!File.Exists(configFilePath)) {
-            Console.WriteLine("Error: Config file config.json not found.");
-            Environment.Exit(1); // Exit if config file is missing
-        }
-
-        var config = JsonSerializer.Deserialize<Config>(File.ReadAllText(configFilePath));
-        _mkvMergePath = config.MkvMergePath;
-        _pwshPath = config.PwshPath;
-
-        // Console.WriteLine("_mkvMergePath: " + _mkvMergePath);
-        // Console.WriteLine("_pwshPath: " + _pwshPath);
     }
 }
