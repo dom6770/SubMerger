@@ -8,6 +8,9 @@
     <AssemblyName>SubMerger</AssemblyName>
     <RootNamespace>SubMerger</RootNamespace>
     <ApplicationIcon>Resources\app.ico</ApplicationIcon>
+    <Version>0.3.0</Version>
+    <FileVersion>0.3.0.0</FileVersion>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
