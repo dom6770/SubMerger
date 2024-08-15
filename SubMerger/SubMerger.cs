@@ -2,23 +2,24 @@
 using System.IO;
 using System.Text.RegularExpressions;
 using System;
+using System.Linq;
 
 class SubMerger {
-    public string Path { get; set; }
+    public string InputPath { get; set; }
     public string FolderName { get; set; }
     public string[] SubfoldersList { get; set; }
     public bool MultipleFiles { get; set; }
 
     public SubMerger(string argPath, string argName) {
-        Path = argPath;
+        InputPath = argPath;
         FolderName = argName;
 
-        SubfoldersList = Directory.GetDirectories(Path);
+        SubfoldersList = Directory.GetDirectories(InputPath);
         Array.Sort(SubfoldersList);
 
         // this Regex checks if there's just "S02" tag in the directory name.
         // A movie would't have anything, a single episode S02E01 (f.ex.), so only a season folder would've only S01
-        MultipleFiles = Regex.Match(Path, @"S[0-9]{2}[^E]").Success ? true : false;
+        MultipleFiles = Regex.Match(InputPath, @"S[0-9]{2}[^E]").Success ? true : false;
     }
     
 
@@ -32,13 +33,13 @@ class SubMerger {
         // args[1] should be the folder name of the media
 
         // Header
-        Output.WriteHeader(Path, SubfoldersList.Length);
+        Output.WriteHeader(InputPath, SubfoldersList.Length);
 
         try {
             if(MultipleFiles) {
-                Output.WriteSeasonInfo(Path);
+                Output.WriteSeasonInfo(InputPath);
 
-                List<string> queue = Folder.GetQueue(Path);
+                List<string> queue = Folder.GetQueue(InputPath);
                 int progress = 0;
 
                 foreach(string item in queue) {
@@ -59,17 +60,17 @@ class SubMerger {
                 } else return 1;
 
             } else if(!MultipleFiles) {
-                Output.WriteInfo(Path);
+                Output.WriteInfo(InputPath);
 
-                if(Directory.Exists(Path + @"\Subs")) {
+                if(Directory.Exists(Path.Combine(InputPath, "Subs"))) {
                     Console.WriteLine("{0} | (S) mkvmerge in progress", DateTime.Now.ToString("HH:mm:ss"));
-                    Folder.MoveSubsToRoot(Path);
-                    mkvmerge.Initialize(Path);
+                    Folder.MoveSubsToRoot(InputPath);
+                    mkvmerge.Initialize(InputPath);
                     Console.WriteLine("{0} | (S) mkvmerge done", DateTime.Now.ToString("HH:mm:ss"));
                     return 0;
-                } else if(Folder.SubfilesExist(Path, "*")) {
+                } else if(Folder.SubfilesExist(InputPath, "*")) {
                     Console.WriteLine("{0} | (S) mkvmerge in progress", DateTime.Now.ToString("HH:mm:ss"));
-                    mkvmerge.Initialize(Path);
+                    mkvmerge.Initialize(InputPath);
                     Console.WriteLine("{0} | (S) mkvmerge done", DateTime.Now.ToString("HH:mm:ss"));
                     return 0;
                 } else {

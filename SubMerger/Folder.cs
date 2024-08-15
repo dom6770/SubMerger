@@ -8,18 +8,18 @@ class Folder {
         string[] dirArray = Directory.GetDirectories(inputPath);
         List<string> queue = new();
         foreach(string dir in dirArray) {
-            if(Directory.Exists(dir + @"\Subs") && Directory.GetFiles(dir + @"\Subs\","*eng*").Any())
+            if(Directory.Exists(Path.Combine(dir, "Subs")) && Directory.GetFiles(Path.Combine(dir, "Subs"),"*eng*").Any())
                 queue.Add(dir);
         };
         return queue;
     }
     public static void MoveSubsToRoot(string inputPath) {
-        string subtitlesPath = inputPath + @"\Subs";
+        string subtitlesPath = Path.Combine(inputPath, "Subs");
         if(Directory.Exists(subtitlesPath)) {
             try {
                 IEnumerable<FileInfo> files = Directory.GetFiles(subtitlesPath).Select(f => new FileInfo(f));       // get every file from the
                 foreach(var file in files)
-                    File.Move(file.FullName,Path.Combine(inputPath,file.Name));
+                    File.Move(file.FullName, Path.Combine(inputPath, file.Name));
                 if(!Directory.EnumerateFileSystemEntries(subtitlesPath).Any())
                     Directory.Delete(subtitlesPath);
             }
@@ -43,8 +43,8 @@ class Folder {
     public static int CountFullEngSubfiles(string folder) {
         int i = 0;
         foreach(string dir in Directory.GetDirectories(folder)) {
-            if(Directory.Exists(dir + @"\Subs\")) {
-                foreach(string subsfolder in Directory.GetFiles(dir + @"\Subs","*eng.sub")) {
+            if(Directory.Exists(Path.Combine(dir, "Subs"))) {
+                foreach(string subsfolder in Directory.GetFiles(Path.Combine(dir, "Subs"),"*eng.sub")) {
                     i++;
                 }
             }
@@ -54,7 +54,7 @@ class Folder {
     public static int CountSubtitlesTotal(string inputPath) {
         int i = 0;
         foreach(string dir in Directory.GetDirectories(inputPath))
-            if(Directory.Exists(dir + @"\Subs\"))
+            if(Directory.Exists(Path.Combine(dir, "Subs")))
                 i++;
         return i;
     }
