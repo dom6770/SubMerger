@@ -2,10 +2,14 @@
 using System.IO;
 using System;
 using System.Linq;
+using System.Text.Json;
 
 class mkvmerge {
+    private static string _mkvMergePath;
+    private static string _pwshPath;
     public static void Initialize(string episodeFolder) {
         try {
+            LoadConfig("config.json");
             string mkvInputPath = Directory.GetFiles(episodeFolder, "*.mkv").First();
             string mkvInputName = Path.GetFileNameWithoutExtension(mkvInputPath);
             string mkvOutputPath = mkvInputPath.Remove(mkvInputPath.Length - 4, 4); mkvOutputPath += "_new.mkv";
@@ -44,7 +48,7 @@ class mkvmerge {
             }
 
             if(File.Exists(mkvOutputPath)) { File.Delete(mkvOutputPath); }
-            Run(@"& 'C:\Program Files\MKVToolNix\mkvmerge.exe'" + mkvmergeArgs);
+            Run(mkvmergeArgs);
             Folder.RenameFile(mkvOutputPath,mkvInputPath);
             Folder.DeleteSubtitleFiles(subtitlesIdx);
             Folder.DeleteSubtitleFiles(subtitlesSub);
@@ -53,11 +57,25 @@ class mkvmerge {
             Console.WriteLine(e.ToString());
         }
     }
-    public static void Run(string command) {
-        ProcessStartInfo cmdsi = new ProcessStartInfo("powershell.exe");
-        cmdsi.Arguments = command;
-        Process cmd = Process.Start(cmdsi);
-        // status output in percentage
-        cmd.WaitForExit();
+    public static void Run(string mkvmergeArgs) {
+        ProcessStartInfo command = new(_pwshPath) {
+            Arguments = $"-command \"& {_mkvMergePath} {mkvmergeArgs}\""
+        };
+        // Console.WriteLine("ProcessStartInfo: " + command.Arguments);
+        Process pwsh = Process.Start(command);
+        pwsh.WaitForExit();
+    }
+    private static void LoadConfig(string configFilePath) {
+        if(!File.Exists(configFilePath)) {
+            Console.WriteLine("Error: Config file config.json not found.");
+            Environment.Exit(1); // Exit if config file is missing
+        }
+
+        var config = JsonSerializer.Deserialize<Config>(File.ReadAllText(configFilePath));
+        _mkvMergePath = config.MkvMergePath;
+        _pwshPath = config.PwshPath;
+
+        // Console.WriteLine("_mkvMergePath: " + _mkvMergePath);
+        // Console.WriteLine("_pwshPath: " + _pwshPath);
     }
 }

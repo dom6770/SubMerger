@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 class Program {
     private static int Main(string[] args) {
 
