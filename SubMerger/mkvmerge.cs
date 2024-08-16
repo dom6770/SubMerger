@@ -25,32 +25,28 @@ class mkvmerge {
             if(Folder.SubfilesExist(episodeFolder, subtitleEngFull)) {
                 mkvmergeArgs.AddRange(new[] {
                     "--language", "0:eng", "--track-name", "0:Full",
-                    Directory.GetFiles(episodeFolder, subtitleEngFull + ".idx")[0],
-                    Directory.GetFiles(episodeFolder, subtitleEngFull + ".sub")[0]
+                    Directory.GetFiles(episodeFolder, subtitleEngFull + ".idx")[0]
                 });
             }
 
             if(Folder.SubfilesExist(episodeFolder, subtitleEngForced)) {
                 mkvmergeArgs.AddRange(new[] {
                     "--language", "0:eng", "--track-name", "0:Forced",
-                    Directory.GetFiles(episodeFolder, subtitleEngForced + ".idx")[0],
-                    Directory.GetFiles(episodeFolder, subtitleEngForced + ".sub")[0]
+                    Directory.GetFiles(episodeFolder, subtitleEngForced + ".idx")[0]
                 });
             }
 
             if(Folder.SubfilesExist(episodeFolder, subtitleGerFull)) {
                 mkvmergeArgs.AddRange(new[] {
                     "--language", "0:deu", "--track-name", "0:Full",
-                    Directory.GetFiles(episodeFolder, subtitleGerFull + ".idx")[0],
-                    Directory.GetFiles(episodeFolder, subtitleGerFull + ".sub")[0]
+                    Directory.GetFiles(episodeFolder, subtitleGerFull + ".idx")[0]
                 });
             }
 
             if(Folder.SubfilesExist(episodeFolder, subtitleGerForced)) {
                 mkvmergeArgs.AddRange(new[] {
                     "--language", "0:deu", "--track-name", "0:Forced",
-                    Directory.GetFiles(episodeFolder, subtitleGerForced + ".idx")[0],
-                    Directory.GetFiles(episodeFolder, subtitleGerForced + ".sub")[0]
+                    Directory.GetFiles(episodeFolder, subtitleGerForced + ".idx")[0]
                 });
             }
 
