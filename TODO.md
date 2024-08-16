@@ -1,0 +1,3 @@
+- Improve Output
+-- Improve Formatting
+-- Add finished in x seconds
