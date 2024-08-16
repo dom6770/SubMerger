@@ -1,3 +1,6 @@
 - Improve Output
 -- Improve Formatting
 -- Add finished in x seconds
+- Improve subtitle detection (not relying on file names)
+- Add support for .srt
+- Add support for .ass
