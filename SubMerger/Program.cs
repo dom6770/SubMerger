@@ -17,6 +17,11 @@ class Program {
             return 2;
         } 
 
+        if(!OperatingSystem.IsLinux() && !OperatingSystem.IsWindows()) {
+            Console.WriteLine("Error: This tool is only supported on Linux and Windows.");
+            return 3;
+        }
+        
         SubMerger subMerger = new(
             args[0],
             args.Length > 1 ? args[1] : DateTime.Now.ToString("dd-MM_HH-mm")
