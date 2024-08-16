@@ -3,15 +3,17 @@ SubMerger is a C# programm for SABnzbd, used as post-processing script for mergi
 
 It supports at the moment only VobSubs (.idx, .sub).
 
+## Compatibility
+
+- Windows
+- Linux
+
+## Requirements
+
+- mkvmerge (https://mkvtoolnix.download/windows/releases/) (tested with v74 and v86)
+- Linux: glibc 
 
 ## Installation
 
-- Download the binary
-- Download mkvmerge
-- Put the SubMerger.exe into the SABnzbd Scripts Folder (found in the SABnzbd settings unter "Folders")
+- Put the binary into the SABnzbd Scripts Folder (found in the SABnzbd settings unter "Folders")
 - Modify settings in SABnzbd settings under "Categories" and select "SubMerger.exe" 
-
-## ToDo & Planned Features
-
-- improve mkvmerge binary "finding"
-- add .srt support
