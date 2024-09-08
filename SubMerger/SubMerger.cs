@@ -62,7 +62,7 @@ class SubMerger {
             } else if(!MultipleFiles) {
                 Output.WriteInfo(InputPath);
 
-                if(Directory.Exists(Path.Combine(InputPath, "Subs"))) {
+                if(Directory.GetDirectories(InputPath).Any(d => string.Equals(Path.GetFileName(d), "Subs", StringComparison.OrdinalIgnoreCase))) {
                     Console.WriteLine("{0} | (S) mkvmerge in progress", DateTime.Now.ToString("HH:mm:ss"));
                     Folder.MoveSubsToRoot(InputPath);
                     mkvmerge.Initialize(InputPath);

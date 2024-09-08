@@ -14,7 +14,9 @@ class Folder {
         return queue;
     }
     public static void MoveSubsToRoot(string inputPath) {
-        string subtitlesPath = Path.Combine(inputPath, "Subs");
+        string subtitlesPath = Directory.GetDirectories(inputPath)
+            .FirstOrDefault(d => string.Equals(Path.GetFileName(d), "Subs", StringComparison.OrdinalIgnoreCase));
+        
         if(Directory.Exists(subtitlesPath)) {
             try {
                 IEnumerable<FileInfo> files = Directory.GetFiles(subtitlesPath).Select(f => new FileInfo(f));       // get every file from the
