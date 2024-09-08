@@ -3,6 +3,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
+class Subtitles {
+    public string GermanFull { get; set; }
+    public string GermanForced { get; set; }
+    public string EnglishFull { get; set; }
+    public string EnglishForced { get; set; }
+}
+
 class mkvmerge {
     public static void Initialize(string episodeFolder) {
         try {
@@ -13,41 +20,41 @@ class mkvmerge {
             string[] subtitlesIdx = Directory.GetFiles(episodeFolder, "*.idx");
             string[] subtitlesSub = Directory.GetFiles(episodeFolder, "*.sub");
 
-            string subtitleEngFull = mkvInputName + "*eng";
-            string subtitleEngForced = mkvInputName + "*eng*forced";
-            string subtitleGerFull = mkvInputName;
-            string subtitleGerForced = mkvInputName + "*forced";
+            var subtitles = new Subtitles {
+                GermanFull = subtitlesIdx.FirstOrDefault(s => s.EndsWith(".idx") && !s.Contains("forced") && !s.Contains("eng")),
+                GermanForced = subtitlesIdx.FirstOrDefault(s => s.Contains(".forced.idx") && !s.Contains("eng")),
+                EnglishFull = subtitlesIdx.FirstOrDefault(s => s.Contains(".eng.idx") && !s.Contains("forced")),
+                EnglishForced = subtitlesIdx.FirstOrDefault(s => s.Contains(".eng.forced.idx"))
+            };
+
+
+            Console.WriteLine("\n┌── Mapped Subtitles");
+            Console.WriteLine("├── German Full: " + subtitles.GermanFull);
+            Console.WriteLine("├── German Forced: " + subtitles.GermanForced);
+            Console.WriteLine("├── English Full: " + subtitles.EnglishFull);
+            Console.WriteLine("└── English Forced: " + subtitles.EnglishForced + "\n");
+
+            // Console.WriteLine("Press any key to continue...");
+            // Console.ReadKey();
 
             var mkvmergeArgs = new[]{
                 "--output", mkvOutputPath, "--quiet", "--no-subtitles", mkvInputPath
             }.ToList();
 
-            if(Folder.SubfilesExist(episodeFolder, subtitleEngFull)) {
-                mkvmergeArgs.AddRange(new[] {
-                    "--language", "0:eng", "--track-name", "0:Full",
-                    Directory.GetFiles(episodeFolder, subtitleEngFull + ".idx")[0]
-                });
+            if(File.Exists(subtitles.EnglishFull)) {
+                mkvmergeArgs.AddRange(new[] { "--language", "0:eng", "--track-name", "0:Full", subtitles.EnglishFull });
             }
 
-            if(Folder.SubfilesExist(episodeFolder, subtitleEngForced)) {
-                mkvmergeArgs.AddRange(new[] {
-                    "--language", "0:eng", "--track-name", "0:Forced",
-                    Directory.GetFiles(episodeFolder, subtitleEngForced + ".idx")[0]
-                });
+            if(File.Exists(subtitles.EnglishForced)) {
+                mkvmergeArgs.AddRange(new[] { "--language", "0:eng", "--track-name", "0:Forced", subtitles.EnglishForced });
             }
 
-            if(Folder.SubfilesExist(episodeFolder, subtitleGerFull)) {
-                mkvmergeArgs.AddRange(new[] {
-                    "--language", "0:deu", "--track-name", "0:Full",
-                    Directory.GetFiles(episodeFolder, subtitleGerFull + ".idx")[0]
-                });
+            if(File.Exists(subtitles.GermanFull)) {
+                mkvmergeArgs.AddRange(new[] { "--language", "0:deu", "--track-name", "0:Full", subtitles.GermanFull });
             }
 
-            if(Folder.SubfilesExist(episodeFolder, subtitleGerForced)) {
-                mkvmergeArgs.AddRange(new[] {
-                    "--language", "0:deu", "--track-name", "0:Forced",
-                    Directory.GetFiles(episodeFolder, subtitleGerForced + ".idx")[0]
-                });
+            if(File.Exists(subtitles.GermanForced)) {
+                mkvmergeArgs.AddRange(new[] { "--language", "0:deu", "--track-name", "0:Forced", subtitles.GermanForced });
             }
 
             if(File.Exists(mkvOutputPath)) { File.Delete(mkvOutputPath); }
@@ -63,10 +70,8 @@ class mkvmerge {
         }
     }
 
-    public static void Run(string[] mkvmergeArgs)
-    {
-        ProcessStartInfo command = new()
-        {
+    public static void Run(string[] mkvmergeArgs) {
+        ProcessStartInfo command = new() {
             FileName = "mkvmerge",          // Directly call mkvmerge
             Arguments = string.Join(" ", mkvmergeArgs), // Join arguments with spaces
             RedirectStandardOutput = true,  // Capture the output
@@ -82,6 +87,5 @@ class mkvmerge {
         if (!string.IsNullOrEmpty(error)) {
             Console.WriteLine($"Error: {error}");
         }
-        
     }
 }
