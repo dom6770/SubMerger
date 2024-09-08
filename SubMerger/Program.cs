@@ -21,6 +21,8 @@ class Program {
             Console.WriteLine("Error: This tool is only supported on Linux and Windows.");
             return 3;
         }
+
+        Console.WriteLine("Version: 0.5.0");
         
         SubMerger subMerger = new(
             args[0],
