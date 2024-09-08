@@ -61,13 +61,13 @@ class Output {
 
         if(Directory.Exists(Path.Combine(inputPath, "Subs"))) {
             Console.Write("found in the Subs subdirectory\n");
-            if(Directory.GetFiles(Path.Combine(inputPath, "Subs"),"*.sub").Length > 0)
-                foreach(string file in Directory.GetFiles(Path.Combine(inputPath, "Subs"),"*.sub"))
+            if(Directory.GetFiles(Path.Combine(inputPath, "Subs"),"*.idx").Length > 0)
+                foreach(string file in Directory.GetFiles(Path.Combine(inputPath, "Subs"),"*.idx"))
                     Console.WriteLine("|-> " + file.Remove(0,inputPath.Length + 6));
         } else if(Directory.Exists(inputPath)) {
             Console.Write("found in the root directory\n");
-            if (Directory.GetFiles(inputPath, "*.sub").Length > 0)
-                foreach (string file in Directory.GetFiles(inputPath, "*.sub"))
+            if (Directory.GetFiles(inputPath, "*.idx").Length > 0)
+                foreach (string file in Directory.GetFiles(inputPath, "*.idx"))
                     Console.WriteLine("|-> " + file);
         } else Console.Write("missing");
         Console.WriteLine("");
