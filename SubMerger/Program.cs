@@ -7,6 +7,8 @@ class Program {
         //subMerger.inputName = args[0];
         //subMerger.inputPath = args.Length > 1 ? args[1] : DateTime.Now.ToString("dd-MM_HH-mm");
 
+        Console.WriteLine("Version: 0.5.0");
+
         if(args.Length == 0) {
             Console.WriteLine("Error: No arguments provided. Please specify the input path as first, and optionally the movie name as second argument.");
             return 1;         
@@ -22,7 +24,6 @@ class Program {
             return 3;
         }
 
-        Console.WriteLine("Version: 0.5.0");
         
         SubMerger subMerger = new(
             args[0],
